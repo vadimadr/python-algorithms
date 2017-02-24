@@ -1,0 +1,12 @@
+language: python
+sudo: true
+python:
+  - "3.5"
+
+env:
+  matrix:
+    - TOXENV=flake8
+    - TOXENV=tests
+
+script:
+  - tox
