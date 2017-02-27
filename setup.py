@@ -1,8 +1,8 @@
-import os
 from setuptools import Extension
 from setuptools import setup, find_packages
 from setuptools.command.test import test as TestCommand
 
+import os
 import sys
 
 
@@ -20,35 +20,51 @@ class PyTest(TestCommand):
         sys.exit(errno)
 
 
+package_data = {'': 'LICENSE'}
+
 # Change if you want to compile *.pyx sources to *.cpp
-USE_CYTHON = False
-
-extensions = [Extension('algorithms.sorting._sorting',
-                        ['algorithms/sorting/_sorting.pyx'], language='c++')]
+USE_CYTHON = bool(os.environ.get('USE_CYTHON', True))
 
 
-def no_cythonize(extensions, **_ignore):
-    for extension in extensions:
-        sources = []
-        for sfile in extension.sources:
-            path, ext = os.path.splitext(sfile)
-            if ext in ('.pyx', '.py'):
-                if extension.language == 'c++':
-                    ext = '.cpp'
-                else:
-                    ext = '.c'
-                sfile = path + ext
-            sources.append(sfile)
-        extension.sources[:] = sources
-    return extensions
+def compile_cython(use_cython=True):
+    source_root = os.path.abspath(os.path.dirname(__file__))
+    cython_extensions = [
+        'algorithms.sorting._sorting',
+    ]
+
+    extensions = []
+
+    for ext in cython_extensions:
+        source_file = os.path.join(source_root, *ext.split('.'))
+        depends = []
+        ext_package = '.'.join(ext.split('.')[:-1])
+
+        if use_cython:
+            ext_data = ['*.pyx', '*.cc', '*.cpp', '*.hpp']
+            pxd_source = source_file + '.pxd'
+            pyx_source = source_file + '.pyx'
+            if os.path.exists(pxd_source):
+                depends.append(pxd_source)
+                ext_data.append('*.pxd')
+        else:
+            ext_data = []
+            extensions.append(source_file + '.cpp')
+            pyx_source = source_file + '.cpp'
+
+        extensions.append(
+            Extension(ext, sources=[pyx_source], depends=depends,
+                      language='c++'))
+
+        package_data[ext_package] = ext_data
+
+    if use_cython:
+        from Cython.Build import cythonize
+        return cythonize(extensions)
+    else:
+        return extensions
 
 
-if USE_CYTHON:
-    from Cython.Build import cythonize
-
-    extensions = cythonize(extensions)
-else:
-    extensions = no_cythonize(extensions)
+extensions = compile_cython()
 
 requirements = [
     'numpy==1.12.0',
@@ -72,8 +88,11 @@ setup(
     description='Implementation of some common algorithms',
     ext_modules=extensions,
     zip_safe=False,
-    package_data={'': ['LICENSE']},
+    package_data=package_data,
     install_requires=requirements,
+    setup_requires=[
+        'cython',
+    ],
     tests_require=test_requirements,
     test_suite='tests',
     cmdclass={'test': PyTest},
