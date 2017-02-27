@@ -8,5 +8,5 @@ env:
     - TOXENV=flake8
     - TOXENV=tests
 
-script:
-  - tox
+install: pip install tox
+script: tox
