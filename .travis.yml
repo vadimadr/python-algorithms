@@ -6,7 +6,7 @@ python:
 env:
   matrix:
     - TOXENV=flake8
-    - TOXENV=tests
+    - TOXENV=py3
 
 install: pip install tox
 script: tox
