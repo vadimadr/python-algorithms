@@ -1,4 +1,4 @@
-from . import *
+from . import BaseGraph
 
 
 def dfs(g: BaseGraph, u):

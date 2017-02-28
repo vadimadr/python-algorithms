@@ -61,16 +61,20 @@ def BoyerMoore(needle, haystack):
 
 def KMP(needle, haystack):
     """
-    Алгоритм Кнута — Морриса — Пратта (https://ru.wikipedia.org/wiki/Алгоритм_Кнута_—_Морриса_—_Пратта)
-    Knuth–Morris–Pratt algorithm (https://en.wikipedia.org/wiki/Knuth-Morris-Pratt_algorithm)
+    Алгоритм Кнута — Морриса — Пратта (
+    https://ru.wikipedia.org/wiki/Алгоритм_Кнута_—_Морриса_—_Пратта)
+    Knuth–Morris–Pratt algorithm (
+    https://en.wikipedia.org/wiki/Knuth-Morris-Pratt_algorithm)
     http://e-maxx.ru/algo/prefix_function
 
-    посчитать префис-функцию строки needle#pattern, элементы соответствующеие |needle| являтся индексом
+    посчитать префис-функцию строки needle#pattern, элементы
+    соответствующеие |needle| являтся индексом
     окончания вхождения подстроки
 
     """
     p, k = prefix(needle), 0
-    # Накладываем needle на haystack, перемещаем курсор (k) до тех пор, пока символы совпадают
+    # Накладываем needle на haystack, перемещаем курсор (k) до тех пор,
+    # пока символы совпадают
     for i in range(len(haystack)):
         # Если символ не совпал, перемещаем курсор в needle на p[k]
         while k > 0 and haystack[i] != needle[k]:
@@ -82,4 +86,3 @@ def KMP(needle, haystack):
         if k == len(needle):
             return i - len(needle) + 1
     return -1
-

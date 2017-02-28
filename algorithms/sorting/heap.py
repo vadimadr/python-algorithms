@@ -8,4 +8,3 @@ a[0] is the smallest element
 -level of depth k is being filled left to right
 -all child nodes are less or equal to parent node
 """
-

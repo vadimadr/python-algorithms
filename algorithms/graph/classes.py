@@ -131,8 +131,7 @@ class BaseGraph(ABC, metaclass=ABCMeta):
             for v in self.predecessors(u):
                 self.remove_edge(v, u)
         for v in self.successors(u):
-            self.remove_edge(u,v)
-
+            self.remove_edge(u, v)
 
     def has_node(self, u):
         return u in self._nodes
@@ -533,8 +532,6 @@ class HashListGraph(BaseGraph):
     # enumerating O(K)
 
     # TODO: resizing, initializing, removing edge
-
-
     def distance(self, u, v):
         if super().distance(u, v) == 0:
             return 0

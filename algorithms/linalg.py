@@ -4,3 +4,8 @@ def dot_product(lhs, rhs):
 
     M, N = len(lhs), len(lhs[0])
     K, Q = len(rhs), len(rhs[0])
+
+    # implemet later
+    assert N == K
+    assert isinstance(M, int)
+    assert isinstance(Q, int)

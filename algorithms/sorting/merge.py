@@ -1,5 +1,6 @@
 from .simple import insertion_sort
 
+
 def merge2(a, lo, mid, hi):
     n = (hi - lo + 1)
     b = [0] * n
@@ -40,7 +41,7 @@ def merge_n(a, run):
     # number of runs
     nrun = len(run) - 1
 
-    #TODO: Smart temporary array creation (get rid of last copy)
+    # TODO: Smart temporary array creation (get rid of last copy)
 
     # unless all runs are merged
     while nrun > 1:
@@ -63,8 +64,8 @@ def merge_n(a, run):
 
 MIN_MERGE = 8
 
+
 def merge_sort(a, l, r):
-    n = r - l + 1
     runs = []
 
     for k in range(l, r + 1, MIN_MERGE):

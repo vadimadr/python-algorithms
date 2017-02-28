@@ -4,6 +4,7 @@ import numpy as np
 
 from algorithms.sorting import *
 from algorithms.sorting.merge import merge_lists, merge_n_lists, merge_sort
+from algorithms.sorting.utils import simple_sort, is_sorted
 
 
 class BaseSortTest(TestCase):

@@ -308,7 +308,7 @@ def change_base(x, m, p):
     list
         digits of x in base p
     """
-    sieve()
+    pass
 
 
 def Bernoulli_number(n):

@@ -73,7 +73,7 @@ def subgraph(g: BaseGraph, nodes):
 
     weighted = g.weighted
     directed = g.directed
-    g_new = g.__class__(weighted, directed)
+    g_new = g.__class__(weighted=weighted, directed=directed)
 
     for u in g:
         if u in nodes:
@@ -87,13 +87,13 @@ def subgraph(g: BaseGraph, nodes):
 
 
 def graph_union(g1: BaseGraph, g2: BaseGraph):
-    weighted = g.weighted
-    directed = g.directed
+    weighted = g1.weighted
+    directed = g1.directed
     g_new = g1.__class__(weighted, directed)
 
     for u in chain(g1, g2):
-        for v in g.successors(u):
-            if g.weighted:
+        for v in g1.successors(u):
+            if g1.weighted:
                 g_new.add_edge(u, v[0], v[1])
             else:
                 g_new.add_edge(u, v)
@@ -112,11 +112,11 @@ def graph_join(g1, g2, weight=1):
             if g1.directed:
                 inter_edges.append((v, u, weight))
 
-    g_new = g1.__class__(directed=g1.directed, weighted=g.weighted)
+    g_new = g1.__class__(directed=g1.directed, weighted=g1.weighted)
 
     for u in chain(g1, g2):
-        for v in g.successors(u):
-            if g.weighted:
+        for v in g1.successors(u):
+            if g1.weighted:
                 g_new.add_edge(u, v[0], v[1])
             else:
                 g_new.add_edge(u, v)
