@@ -54,15 +54,15 @@ def compile_cython(use_cython=True):
 
 
 requirements = [
-    'numpy==1.12.0',
-    'scipy==0.18.1',
-    'matplotlib==2.0.0'
+    'numpy',
+    'scipy',
+    'matplotlib'
 ]
 
 test_requirements = [
-    'pytest==3.0.6',
-    'pytest-cov==2.4.0',
-    'pytest-mock==1.5.0',
+    'pytest',
+    'pytest-cov',
+    'pytest-mock',
 ]
 
 setup(

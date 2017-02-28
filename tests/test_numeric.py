@@ -1,3 +1,4 @@
+import os
 from unittest import TestCase
 
 import pytest
@@ -7,16 +8,18 @@ from algorithms.numeric import is_prime, sieve, gcd, even, odd, binomial, \
     fibonacci, \
     factorize, euler_phi
 
+_dir = os.path.dirname(__file__)
+
 
 @pytest.fixture
 def primes():
-    with open('data/primes.dat') as src:
+    with open(os.path.join(_dir, 'data/primes.dat')) as src:
         return list(map(int, src))
 
 
 @pytest.fixture
 def nonprimes():
-    with open('data/notprimes.dat') \
+    with open(os.path.join(_dir, 'data/notprimes.dat')) \
             as \
             src:
         return list(map(int, src))
@@ -64,7 +67,7 @@ class TestSieve(TestCase):
         self.assertEqual(sieve(5), [2, 3, 5])
 
     def test_sieve2(self):
-        with open('data/primes.dat') \
+        with open(os.path.join(_dir, 'data/primes.dat')) \
                 as src:
             lines = src.readlines()
             primes = [int(n.strip()) for n in lines]
