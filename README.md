@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/vadimadr/python-algorithms.svg?branch=master)](https://travis-ci.org/vadimadr/python-algorithms)
+
 Python algorithms
 =================
 This repository contains my implementation of some common algorithms. 
