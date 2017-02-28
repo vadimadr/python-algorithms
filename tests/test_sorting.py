@@ -200,3 +200,10 @@ class TestMergeN(TestCase):
 
 class BaseMergeSortTest(BaseSortTest):
     sort_method = merge_sort
+
+
+def test_fast_sort():
+    np.random.seed(456)
+    xs = np.random.randint(100, size=64)
+    xs_sorted = fast_sort_wrap(xs)
+    assert is_sorted(xs_sorted)

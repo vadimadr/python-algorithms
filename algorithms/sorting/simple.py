@@ -1,5 +1,5 @@
 from .utils import *
-
+from ._sorting import *
 
 def selection_sort(a, l, r):
     for i in range(l, r + 1):

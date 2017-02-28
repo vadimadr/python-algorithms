@@ -137,3 +137,8 @@ fabric.properties
 
 .idea/
 .venv
+
+*.c
+*.cpp
+!*/src/*.c
+!*/src/*.cpp
