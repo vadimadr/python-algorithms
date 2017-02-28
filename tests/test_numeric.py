@@ -10,14 +10,13 @@ from algorithms.numeric import is_prime, sieve, gcd, even, odd, binomial, \
 
 @pytest.fixture
 def primes():
-    with open(
-            '/home/vadim/code/python/algorithms/tests/data/primes.dat') as src:
+    with open('data/primes.dat') as src:
         return list(map(int, src))
 
 
 @pytest.fixture
 def nonprimes():
-    with open('/home/vadim/code/python/algorithms/tests/data/notprimes.dat') \
+    with open('data/notprimes.dat') \
             as \
             src:
         return list(map(int, src))
@@ -65,7 +64,7 @@ class TestSieve(TestCase):
         self.assertEqual(sieve(5), [2, 3, 5])
 
     def test_sieve2(self):
-        with open('/home/vadim/code/python/algorithms/tests/data/primes.dat') \
+        with open('data/primes.dat') \
                 as src:
             lines = src.readlines()
             primes = [int(n.strip()) for n in lines]
