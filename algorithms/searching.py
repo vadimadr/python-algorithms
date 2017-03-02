@@ -79,11 +79,13 @@ def kmp_substr(s, t, start, end):
     '#' is needed to prevent growing after s (e.g aa#a... )
     complexity: O(|s+t|)
     """
+    if len(s) == 0:
+        return 0
     p, k = prefix(s), 0
     for i in range(start, end):
-        while k > 0 and t[k] != t[i]:
+        while k > 0 and s[k] != t[i]:
             k = p[k - 1]
-        if t[k] == t[i]:
+        if s[k] == t[i]:
             k += 1
         if k == len(s):
             return i - k + 1
