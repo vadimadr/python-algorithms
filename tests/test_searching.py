@@ -1,3 +1,5 @@
+import pytest
+
 from unittest.case import TestCase
 
 from algorithms.searching import lower_bound, upper_bound, equal_range, \
@@ -102,49 +104,39 @@ substr_cases = [('aaa', 'a', 0),
                 ('dqzbppwrwh', 'dqzb', 0),
                 ('gqxgfbmxrf', 'mxr', 6),
                 ('ypxiij', 'hntlfk', -1),
-                ('paddthceqirlndjpojjpsodmrohzjkexocqdhpdy', 'lhtixjeaiybwzpgqeuujaxkwablyyzdntuevhjlj', -1),
-                ('utkibcybixucoglcnjjlcoocdikaplizbgapbhity', 'utkibcybixucoglcnjjlcoo', 0),
+                ('paddthceqirlndjpojjpsodmrohzjkexocqdhpdy',
+                 'lhtixjeaiybwzpgqeuujaxkwablyyzdntuevhjlj', -1),
+                ('utkibcybixucoglcnjjlcoocdikaplizbgapbhity',
+                 'utkibcybixucoglcnjjlcoo', 0),
                 ('shpxozhkbnzhhycaqojoctjmcejskpufpehrcar', 'caqojoc', 14),
                 ('mzsiahlihrabgbdtyqhcwdoramscbxysdzqanuiiswpvryscs',
                  'wwuryvxljfggbnxscimmgebsmzvpcdmlytpgfygggsxbxxazj', -1),
                 ('jgwhosbkdscjwrabzhivzmqhmexepzuvomrtngaqykmuvqgrme',
                  'mgzydphujvsqgpvsomejpqyxxjdbsamsipeceiufowljbllihb', -1),
                 ('qabworhuozfyqecgqvg', 'orhuozfyqecgqvg', 4),
-                ('guzbhoyomkddggslvyigrzmxwqpqajxofeuznlwiijua', 'iwdodbzjfdvxdcstwqwlxfipryjtdfztzwagvrqdabrm', -1),
+                ('guzbhoyomkddggslvyigrzmxwqpqajxofeuznlwiijua',
+                 'iwdodbzjfdvxdcstwqwlxfipryjtdfztzwagvrqdabrm', -1),
                 ]
 
 
-class BaseSubstrTest:
-    def __init__(self):
-        self.substr = lambda s, t: self.__class__.__method__(s, t, 0, len(t))
-
-    def test_predefined(self):
-        for t, s, e in substr_cases:
-            yield self.check_substr, t, s, e
-
-    def check_substr(self, t, s, e):
-        assert bruteforce_substr(s, t, 0, len(t)) == e
+@pytest.fixture(scope="class", params=[bruteforce_substr, kmp_substr],
+                ids=["brute", "kmp"])
+def substr_method(request):
+    request.cls.substr = staticmethod(request.param)
 
 
-class TestBruteForceSubstr(BaseSubstrTest):
-    __method__ = bruteforce_substr
+@pytest.mark.usefixtures("substr_method")
+class TestSubstr:
+    @pytest.mark.parametrize('t,s,e', substr_cases)
+    def test_predefined(self, t, s, e):
+        assert self.substr(s, t, 0, len(t)) == e
 
 
-class TestKMPSubstr(BaseSubstrTest):
-    __method__ = kmp_substr
-
-
-def test_prefix():
-    cases = [
-        ('ababaca', [0, 0, 1, 2, 3, 0, 1]),
-        ('aabaaab', [0, 1, 0, 1, 2, 2, 3]),
-        ('abcabcd', [0, 0, 0, 1, 2, 3, 0]),
-        ('abcdabcabcdabcdab', [0, 0, 0, 0, 1, 2, 3, 1, 2, 3, 4, 5, 6, 7, 4, 5, 6])
-
-    ]
-
-    def check_prefix(s, w):
-        assert prefix(s) == w
-
-    for s, expected in cases:
-        yield check_prefix, s, expected
+@pytest.mark.parametrize('s,w', [
+    ('ababaca', [0, 0, 1, 2, 3, 0, 1]),
+    ('aabaaab', [0, 1, 0, 1, 2, 2, 3]),
+    ('abcabcd', [0, 0, 0, 1, 2, 3, 0]),
+    ('abcdabcabcdabcdab', [0, 0, 0, 0, 1, 2, 3, 1, 2, 3, 4, 5, 6, 7, 4, 5, 6])
+])
+def test_prefix(s, w):
+    assert prefix(s) == w
