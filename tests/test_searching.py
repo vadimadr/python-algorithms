@@ -1,12 +1,11 @@
-import pytest
-
 from unittest.case import TestCase
 
+import pytest
 from hypothesis import given
 from hypothesis.strategies import text
 
-from algorithms.searching import lower_bound, upper_bound, equal_range, \
-    bruteforce_substr, kmp_substr, prefix
+from algorithms.searching import (bruteforce_substr, equal_range, kmp_substr,
+                                  lower_bound, prefix, upper_bound)
 from tests.utils import substring_pair
 
 

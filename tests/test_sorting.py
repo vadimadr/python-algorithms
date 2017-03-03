@@ -1,13 +1,12 @@
-from hypothesis import given
-from hypothesis import strategies as st
-
 from unittest import TestCase
 
 import numpy as np
+from hypothesis import strategies as st
+from hypothesis import given
 
 from algorithms.sorting import *
 from algorithms.sorting.merge import merge_lists, merge_n_lists, merge_sort
-from algorithms.sorting.utils import simple_sort, is_sorted
+from algorithms.sorting.utils import is_sorted, simple_sort
 
 
 class BaseSortTest(TestCase):

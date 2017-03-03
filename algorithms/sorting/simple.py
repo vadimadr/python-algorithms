@@ -1,4 +1,5 @@
 from algorithms.sorting.utils import imin, swap
+
 from ._sorting import fast_sort_wrap
 
 

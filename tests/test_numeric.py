@@ -1,15 +1,13 @@
 import os
+from functools import reduce
 from unittest import TestCase
 
 import pytest
-from functools import reduce
-
 from hypothesis import given
 from hypothesis.strategies import integers
 
-from algorithms.numeric import is_prime, sieve, gcd, even, odd, binomial, \
-    fibonacci, \
-    factorize, euler_phi
+from algorithms.numeric import (binomial, euler_phi, even, factorize,
+                                fibonacci, gcd, is_prime, odd, sieve)
 
 _dir = os.path.dirname(__file__)
 

@@ -1,15 +1,9 @@
 import numpy as np
 import pytest
 
-from algorithms.graph import AdjMxGraph
-from algorithms.graph import AdjSetGraph
-from algorithms.graph import EdgeListGraph
-from algorithms.graph import is_complete_graph
-from algorithms.graph import subgraph
-from algorithms.graph import to_adjacency_list
-from algorithms.graph import to_adjacency_matrix
-from algorithms.graph import to_edge_list
-from algorithms.graph import to_undirected
+from algorithms.graph import (AdjMxGraph, AdjSetGraph, EdgeListGraph,
+                              is_complete_graph, subgraph, to_adjacency_list,
+                              to_adjacency_matrix, to_edge_list, to_undirected)
 from algorithms.graph.searching import dfs_iter
 
 k5 = [(0, 1), (0, 2), (0, 3), (0, 4), (1, 2), (1, 3), (1, 4), (2, 3), (2, 4),

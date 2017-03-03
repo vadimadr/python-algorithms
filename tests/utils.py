@@ -1,10 +1,9 @@
 import string
-from random import random, randint
-
-from hypothesis.extra.numpy import arrays
-from hypothesis.strategies import text, composite, floats, integers
+from random import randint, random
 
 import numpy as np
+from hypothesis.extra.numpy import arrays
+from hypothesis.strategies import composite, floats, integers, text
 
 printable = text(string.printable)
 

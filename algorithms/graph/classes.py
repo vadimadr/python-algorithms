@@ -30,11 +30,11 @@ References:
     * https://arxiv.org/pdf/0908.3089.pdf
     * http://codeforces.com/blog/entry/12217?locale=ru&mobile=false
 """
+from abc import ABC, ABCMeta
+from bisect import bisect_left, insort
 from contextlib import suppress
 
 import numpy as np
-from abc import ABC, ABCMeta
-from bisect import insort, bisect_left
 
 
 class BaseGraph(ABC, metaclass=ABCMeta):

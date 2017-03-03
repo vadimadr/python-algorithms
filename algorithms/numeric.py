@@ -1,7 +1,6 @@
+from functools import reduce
 from itertools import chain
 from math import sqrt
-
-from functools import reduce
 from operator import mul
 
 
