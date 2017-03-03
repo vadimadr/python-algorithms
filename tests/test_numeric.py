@@ -4,6 +4,9 @@ from unittest import TestCase
 import pytest
 from functools import reduce
 
+from hypothesis import given
+from hypothesis.strategies import integers
+
 from algorithms.numeric import is_prime, sieve, gcd, even, odd, binomial, \
     fibonacci, \
     factorize, euler_phi
@@ -81,6 +84,14 @@ class TestSieve(TestCase):
         (624129, 2061517, 18913)))
 def test_gcd(a, b, expected):
     assert gcd(a, b) == expected
+
+
+@given(integers(), integers())
+def test_gcd_invariant(a, b):
+    d = gcd(a, b)
+    if d != 0:
+        assert a % d == 0
+        assert b % d == 0
 
 
 def test_even():
