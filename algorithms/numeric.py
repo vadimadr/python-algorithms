@@ -312,3 +312,25 @@ def change_base(x, m, p):
 
 def Bernoulli_number(n):
     pass
+
+
+def newton_raphson_root(f, y, x0, df=None):
+    """Solve f(x) = y using using the Newton-Raphson or secant method.
+
+    Parameters
+    ----------
+    x0 : float
+        initial guess
+    df : function
+        derivative of f. If it is None (default), then the secant method is
+        used.
+    """
+    if df is None:
+        return x0
+
+    x = x0
+    err = abs(f(x) - y)
+    while err > 1e-6:
+        x = x - (f(x) - y) / df(x)
+        err = abs(f(x) - y)
+    return x

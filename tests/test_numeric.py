@@ -5,9 +5,11 @@ from unittest import TestCase
 import pytest
 from hypothesis import given
 from hypothesis.strategies import integers
+from math import cos, sin
 
 from algorithms.numeric import (binomial, euler_phi, even, factorize,
-                                fibonacci, gcd, is_prime, odd, sieve)
+                                fibonacci, gcd, is_prime, odd, sieve,
+                                newton_raphson_root)
 
 _dir = os.path.dirname(__file__)
 
@@ -119,3 +121,13 @@ def test_euler_phi():
     assert euler_phi(3) == 2
     assert euler_phi(25) == 20
     assert euler_phi(4242) == 1200
+
+
+def test_newton_root():
+    f1 = lambda x: cos(x) - x ** 3
+    df1 = lambda x: -sin(x) - 3 * x ** 2
+    assert abs(newton_raphson_root(f1, 0, 0.5, df1) - 0.865474033102) < 1e-6
+
+    f2 = lambda x: x ** 5 - 2 * x
+    df2 = lambda x: 5 * x ** 4 - 2
+    assert abs(newton_raphson_root(f2, -3, 0, df2) - -1.42361) < 1e-5
