@@ -1,7 +1,10 @@
 import string
 from random import random, randint
 
-from hypothesis.strategies import text, composite
+from hypothesis.extra.numpy import arrays
+from hypothesis.strategies import text, composite, floats, integers
+
+import numpy as np
 
 printable = text(string.printable)
 
@@ -18,3 +21,7 @@ def substring_pair(draw):
         start = randint(0, len(t) - n)  # start os occurrence
         return t, t[start:start + n]
     return t, s
+
+
+def square_matrices(elements=floats(), N=integers(min_value=1, max_value=20)):
+    return N.flatmap(lambda n: arrays(np.float, (n, n), elements))
