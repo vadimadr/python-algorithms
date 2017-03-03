@@ -1,3 +1,6 @@
+from hypothesis import given
+from hypothesis import strategies as st
+
 from unittest import TestCase
 
 import numpy as np
@@ -206,5 +209,11 @@ class BaseMergeSortTest(BaseSortTest):
 def test_fast_sort():
     np.random.seed(456)
     xs = np.random.randint(100, size=64)
+    xs_sorted = fast_sort_wrap(xs)
+    assert is_sorted(xs_sorted)
+
+
+@given(xs=st.lists(st.integers(min_value=-1000, max_value=1000)))
+def test_sort_auto(xs):
     xs_sorted = fast_sort_wrap(xs)
     assert is_sorted(xs_sorted)

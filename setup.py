@@ -63,6 +63,7 @@ test_requirements = [
     'pytest',
     'pytest-cov',
     'pytest-mock',
+    'hypothesis',
 ]
 
 setup(

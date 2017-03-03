@@ -4,6 +4,8 @@ python:
   - "3.5"
 
 env:
+  global:
+    - HYPOTHESIS_PROFILE=ci
   matrix:
     - TOXENV=flake8
     - TOXENV=py3

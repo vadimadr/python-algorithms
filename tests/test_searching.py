@@ -2,8 +2,12 @@ import pytest
 
 from unittest.case import TestCase
 
+from hypothesis import given
+from hypothesis.strategies import text
+
 from algorithms.searching import lower_bound, upper_bound, equal_range, \
     bruteforce_substr, kmp_substr, prefix
+from tests.utils import substring_pair
 
 
 class TestBinSearch(TestCase):
@@ -131,6 +135,11 @@ class TestSubstr:
     def test_predefined(self, t, s, e):
         assert self.substr(s, t, 0, len(t)) == e
 
+    @given(substring_pair())
+    def test_substr_auto(self, substr_pair):
+        t, s = substr_pair
+        assert bruteforce_substr(s, t, 0, len(t)) == t.find(s)
+
 
 @pytest.mark.parametrize('s,w', [
     ('ababaca', [0, 0, 1, 2, 3, 0, 1]),
@@ -140,3 +149,12 @@ class TestSubstr:
 ])
 def test_prefix(s, w):
     assert prefix(s) == w
+
+
+@given(text('abcdef'))
+def test_prefix_invariant(s):
+    p = prefix(s)
+
+    for i, f in enumerate(p):
+        # prefix same as suffix
+        assert s[:f] == s[i - f + 1:i + 1]
