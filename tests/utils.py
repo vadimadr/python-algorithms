@@ -1,11 +1,21 @@
 import string
+import os
 from random import randint, random
 
 import numpy as np
 from hypothesis.extra.numpy import arrays
-from hypothesis.strategies import composite, floats, integers, text
+from hypothesis.strategies import composite, floats, integers, text, \
+    sampled_from
+
+_dir = os.path.dirname(__file__)
 
 printable = text(string.printable)
+
+
+def primes():
+    with open(os.path.join(_dir, 'data/primes.dat')) as src:
+        p = list(map(int, src))
+    return sampled_from(p)
 
 
 # strategy to test substring functions
