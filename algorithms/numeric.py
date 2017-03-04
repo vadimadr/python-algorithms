@@ -314,7 +314,7 @@ def Bernoulli_number(n):
     pass
 
 
-def newton_raphson_root(f, y, x0, df=None):
+def newton_raphson_root(f, y, x0, df=None, tol=1e-6):
     """Solve f(x) = y using using the Newton-Raphson or secant method.
 
     Parameters
@@ -324,13 +324,15 @@ def newton_raphson_root(f, y, x0, df=None):
     df : function
         derivative of f. If it is None (default), then the secant method is
         used.
+    tol : float
+        allowed tolerance
     """
     if df is None:
         return x0
 
     x = x0
     err = abs(f(x) - y)
-    while err > 1e-6:
+    while err > tol:
         x = x - (f(x) - y) / df(x)
         err = abs(f(x) - y)
     return x
