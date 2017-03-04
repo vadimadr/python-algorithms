@@ -72,6 +72,8 @@ T_ = {
     'n^2': lambda n, c: c * n ** 2,
     'n^3': lambda n, c: c * n ** 3,
     'n*logn': lambda n, c: c * n * np.log(n),
+    'n^2*logn': lambda n, c: c * (n**2) * np.log(n),
+    'n*(logn)^2': lambda n, c: c * n * (np.log(n) **2),
 }
 
 
