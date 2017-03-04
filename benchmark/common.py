@@ -149,8 +149,8 @@ def theta_est(th):
     return lambda n: T_[best](n, c)
 
 
-def visualize_range_bench(ns, ys):
-    pyplot.scatter(ns, ys, alpha=.7)
+def visualize_range_bench(ns, ys, label=None):
+    pyplot.scatter(ns, ys, alpha=.7, label=label)
 
     best, ts = guess_theta(ns, ys)
     est = theta_est((best, ts))
