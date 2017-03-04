@@ -36,9 +36,9 @@ def dfs(g: BaseGraph, u):
 
     V = g.order()
 
-    # 0 - edge never visited
-    # 1 - edge visited but not finished yet
-    # 2 - edge is finished
+    # 0 - edge never visited (white)
+    # 1 - edge visited but not finished yet (gray)
+    # 2 - edge is finished (black)
 
     colors = [0] * V
     time_in = [0] * V
@@ -69,15 +69,20 @@ def dfs(g: BaseGraph, u):
     return time_in, time_out
 
 
-def dfs_iter(g: BaseGraph, v, used=None):
+def dfs_iter(g: BaseGraph, v, used=None, preorder=True):
     if used is None:
         used = set()
 
-    used.add(v)
+    if preorder:
+        yield v
+
+    used.add(v)  # black
     for u in g.successors(v):
         if u not in used:
-            yield from dfs_iter(g, u, used)
-    yield u
+            yield from dfs_iter(g, u, used, preorder)
+
+    if not preorder:  # post order
+        yield v
 
 
 def bfs(g: BaseGraph, u):

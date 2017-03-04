@@ -1,3 +1,6 @@
+from itertools import product
+from operator import eq
+
 import numpy as np
 import pytest
 
@@ -225,11 +228,24 @@ class TestGraphUtils:
 
 @pytest.mark.usefixtures("graph_cls")
 class TestSearch:
-    @pytest.mark.skip
     def test_dfs_iter(self):
-        # TODO: fix DFS
-        g = self.graph.from_edge_list(c5)
+        path1 = [0, 1, 2, 3, 4]  # expected dfs order
+        path2 = [0, 1, 4, 3, 2]
 
-        l = [4, 3, 2, 1, 0]
+        graph = np.array([[0, 1, 2, 0, 0],
+                          [1, 0, 0, 0, 3],
+                          [2, 0, 0, 7, 0],
+                          [0, 0, 7, 0, 1],
+                          [0, 3, 0, 1, 0]])
 
-        assert list(dfs_iter(g, 0)) == l
+        for directed, preorder in product([True, False], [True, False]):
+            g1 = self.graph.from_edge_list(c5, directed=directed)
+            g2 = self.graph.from_adjacency_matrix(graph, directed=directed)
+
+            dfs1 = list(dfs_iter(g1, 0, preorder=preorder))
+            dfs2 = list(dfs_iter(g2, 0, preorder=preorder))
+            path1_ = path1 if preorder else reversed(path1)
+            path2_ = path2 if preorder else reversed(path2)
+
+            assert all(map(eq, dfs1, path1_))
+            assert all(map(eq, dfs2, path2_))
