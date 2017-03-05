@@ -378,7 +378,7 @@ class AdjSetGraph(BaseGraph):
             return 0
         u, v = self._get_id(u, v)
         if self._weighted:
-            return self._graph[u][v]
+            return self._graph[u].get(v, 0)
         else:
             return 1 if v in self._graph[u] else 0
 
