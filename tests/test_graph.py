@@ -7,7 +7,7 @@ import pytest
 from algorithms.graph import (AdjMxGraph, AdjSetGraph, EdgeListGraph,
                               is_complete_graph, subgraph, to_adjacency_list,
                               to_adjacency_matrix, to_edge_list, to_undirected)
-from algorithms.graph.searching import dfs_iter, bfs_iter, bfs
+from algorithms.graph.searching import dfs_iter, bfs_iter, bfs, restore_path
 
 k5 = [(0, 1), (0, 2), (0, 3), (0, 4), (1, 2), (1, 3), (1, 4), (2, 3), (2, 4),
       (3, 4)]
@@ -286,3 +286,8 @@ class TestSearch:
             else:
                 assert p == [-1, 0, 1, 4, 0]
                 assert d == [0, 1, 2, 2, 1]
+
+    def test_restore_path(self):
+        assert restore_path([-1, 0, 1, 2, 3], 4) == [0, 1, 2, 3, 4]
+        assert restore_path([-1, 0, 1, 4, 0], 3) == [0, 4, 3]
+        assert restore_path([-1, 0, 1, 2, 3], 0) == [0]
