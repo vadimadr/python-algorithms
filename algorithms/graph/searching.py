@@ -2,6 +2,8 @@ from collections import deque
 
 from . import BaseGraph
 
+inf = float('inf')
+
 
 def dfs(g: BaseGraph, u):
     """
@@ -174,5 +176,42 @@ def restore_path(p: list, v):
     return list(reversed(path))
 
 
-def dijkstra_search(g: BaseGraph, u, v):
-    pass
+def dijkstra_search(g: BaseGraph, u):
+    """
+    Find all shortest paths from node u to all others in O(N^2 + E)
+
+
+    Returns
+    -------
+    d : list
+        d[u] is the number of hops from v to u
+    p : list
+        predecessors
+    """
+    n = g.order()  # |V|
+    d = [inf] * n
+    p = [-1] * n
+
+    unused = set(range(n))
+
+    d[u] = 0
+    while unused:
+        # unused node with minimal distance (d[v])
+        v = None
+        for v_ in unused:
+            if v is None or d[v_] < d[v]:
+                v = v_
+
+        # unreachable from u, end of connected component
+        if d[v] == inf:
+            break
+        unused.remove(v)
+
+        # relaxation
+        for u_, dist in g.successors(v):
+            relaxed = d[v] + dist
+            if relaxed < d[u_]:
+                p[u_] = v
+                d[u_] = relaxed
+
+    return d, p

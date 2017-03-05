@@ -3,11 +3,13 @@ from operator import eq
 
 import numpy as np
 import pytest
+from scipy.sparse import csgraph as scipy_graph
 
 from algorithms.graph import (AdjMxGraph, AdjSetGraph, EdgeListGraph,
                               is_complete_graph, subgraph, to_adjacency_list,
                               to_adjacency_matrix, to_edge_list, to_undirected)
-from algorithms.graph.searching import dfs_iter, bfs_iter, bfs, restore_path
+from algorithms.graph.searching import dfs_iter, bfs_iter, bfs, restore_path, \
+    dijkstra_search
 
 k5 = [(0, 1), (0, 2), (0, 3), (0, 4), (1, 2), (1, 3), (1, 4), (2, 3), (2, 4),
       (3, 4)]
@@ -291,3 +293,48 @@ class TestSearch:
         assert restore_path([-1, 0, 1, 2, 3], 4) == [0, 1, 2, 3, 4]
         assert restore_path([-1, 0, 1, 4, 0], 3) == [0, 4, 3]
         assert restore_path([-1, 0, 1, 2, 3], 0) == [0]
+
+    def test_dijkstra_directed(self):
+        directed_G = np.array([[0, 3, 3, 0, 0],
+                               [0, 0, 0, 2, 4],
+                               [0, 0, 0, 0, 0],
+                               [1, 0, 0, 0, 0],
+                               [2, 0, 0, 2, 0]], dtype=float)
+
+        g = self.graph.from_adjacency_matrix(directed_G, directed=True,
+                                             weighted=True)
+
+        P = []
+        D = []
+        for i in g:
+            d, p = dijkstra_search(g, i)
+            P.append(p)
+            D.append(d)
+
+        D_, P_ = scipy_graph.dijkstra(directed_G, directed=True,
+                                      return_predecessors=True)
+        P_[P_ == -9999] = -1
+        assert (np.array(P, dtype=int) - P_ == 0).all()
+        assert (np.array(P, dtype=float) - P_ < 1e-6).all()
+
+    def test_dijkstra_undirected(self):
+        undirected_G = np.array([[0, 3, 3, 1, 2],
+                                 [3, 0, 0, 2, 4],
+                                 [3, 0, 0, 0, 0],
+                                 [1, 2, 0, 0, 2],
+                                 [2, 4, 0, 2, 0]], dtype=float)
+
+        g = self.graph.from_adjacency_matrix(undirected_G, directed=False,
+                                             weighted=True)
+
+        P = []
+        D = []
+        for i in g:
+            d, p = dijkstra_search(g, i)
+            P.append(p)
+            D.append(d)
+
+        D_, P_ = scipy_graph.dijkstra(undirected_G, return_predecessors=True)
+        P_[P_ == -9999] = -1
+        assert (np.array(P, dtype=int) - P_ == 0).all()
+        assert (np.array(P, dtype=float) - P_ < 1e-6).all()
