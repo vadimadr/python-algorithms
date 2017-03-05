@@ -7,7 +7,7 @@ import pytest
 from algorithms.graph import (AdjMxGraph, AdjSetGraph, EdgeListGraph,
                               is_complete_graph, subgraph, to_adjacency_list,
                               to_adjacency_matrix, to_edge_list, to_undirected)
-from algorithms.graph.searching import dfs_iter
+from algorithms.graph.searching import dfs_iter, bfs_iter, bfs
 
 k5 = [(0, 1), (0, 2), (0, 3), (0, 4), (1, 2), (1, 3), (1, 4), (2, 3), (2, 4),
       (3, 4)]
@@ -249,3 +249,40 @@ class TestSearch:
 
             assert all(map(eq, dfs1, path1_))
             assert all(map(eq, dfs2, path2_))
+
+    def test_bfs_iter(self):
+        graph = np.array([[0, 1, 2, 0, 0],
+                          [1, 0, 0, 0, 3],
+                          [2, 0, 0, 7, 0],
+                          [0, 0, 7, 0, 1],
+                          [0, 3, 0, 1, 0]])
+
+        path1 = [0, 1, 4, 2, 3]  # c5, undir
+        path2 = [0, 1, 2, 3, 4]  # c5, dir
+        path3 = [0, 1, 2, 4, 3]  # g2, dir / undir
+
+        for directed in (True, False):
+            g1 = self.graph.from_edge_list(c5, directed=directed)
+            g2 = self.graph.from_adjacency_matrix(graph, directed=directed)
+
+            bfs1 = list(bfs_iter(g1, 0))
+            bfs2 = list(bfs_iter(g2, 0))
+
+            assert all(map(eq, bfs2, path3))
+            if not directed:
+                assert all(map(eq, bfs1, path1))
+            else:
+                assert all(map(eq, bfs1, path2))
+
+    def test_bfs_order(self):
+        for directed in (True, False):
+            g = self.graph.from_edge_list(c5, directed=directed)
+
+            d, p = bfs(g, 0)
+
+            if directed:
+                assert p == [-1, 0, 1, 2, 3]
+                assert d == [0, 1, 2, 3, 4]
+            else:
+                assert p == [-1, 0, 1, 4, 0]
+                assert d == [0, 1, 2, 2, 1]
