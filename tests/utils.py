@@ -34,3 +34,7 @@ def substring_pair(draw):
 
 def square_matrices(elements=floats(), N=integers(min_value=1, max_value=20)):
     return N.flatmap(lambda n: arrays(np.float, (n, n), elements))
+
+
+def float_eq(a, b, tol=1e-6):
+    return abs(a - b) < tol

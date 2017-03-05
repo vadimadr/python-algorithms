@@ -180,6 +180,7 @@ def dijkstra_search(g: BaseGraph, u):
     """
     Find all shortest paths from node u to all others in O(N^2 + E)
 
+    assume no negative weights
 
     Returns
     -------
