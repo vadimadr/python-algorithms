@@ -44,9 +44,8 @@ def equal_range(a, val, start, end):
 
 
 def bruteforce_substr(s, t, start, end):
-    n = end - start
     m = len(s)
-    for i in range(n - m + 1):
+    for i in range(start, end + 1):
         if t[i: i + m] == s:
             return i
     return -1
@@ -89,4 +88,70 @@ def kmp_substr(s, t, start, end):
             k += 1
         if k == len(s):
             return i - k + 1
+    return -1
+
+
+def prefix_hash(s, p, P=53):
+    """
+    Compute hashes for every prefix. Only [a-zA-Z] symbols are supported
+
+    Parameters
+    -------------
+    s : str
+        input string
+    p : List[int]
+        all powers of P. p[i] = P ** i
+
+    Returns
+    ----------
+    h : List[int]
+        h[i] = hash(s[:i + 1])
+    """
+    h = [0] * len(s)
+    p_ = len(p)
+    s_ = len(s) - len(p)
+
+    # increase p buf if needed
+    if s_ > 0:
+        p.extend([1] * s_)
+
+    if p_ == 0:
+        p_ += 1  # p**0 = 1
+
+    for i in range(p_, s_):
+        # p[-1] = 1
+        p[i] = p[i - 1] * P
+
+    for i, c in enumerate(s):
+        if c.islower():
+            code = ord(c) - ord('a')
+        else:
+            code = ord(c) - ord('A')
+        h[i] = h[i - 1] + (code + 1) * p[i]
+    return h
+
+
+def robin_karp_substr(s, t, start, end, P=53):
+    if s == '':
+        return 0
+    t = t[start:end]
+    p = []
+    ht = prefix_hash(t, p, P)
+    hs = prefix_hash(s, p, P)
+
+    n = len(t)
+    m = len(s)
+    for i in range(n - m + 1):
+        # get h = hash(t[:i+1])*p[i]
+        if i == 0:
+            h = ht[i + m - 1]
+        else:
+            h = ht[i + m - 1] - ht[i - 1]
+
+        # compare h and hash(s)*p[i]
+        if h == (hs[-1] * p[i]):
+            # check for collision
+            if bruteforce_substr(s, t, i, i + m) != -1:
+                return i
+
     return -1

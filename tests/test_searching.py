@@ -1,3 +1,4 @@
+import string
 from unittest.case import TestCase
 
 import pytest
@@ -5,7 +6,8 @@ from hypothesis import given
 from hypothesis.strategies import text
 
 from algorithms.searching import (bruteforce_substr, equal_range, kmp_substr,
-                                  lower_bound, prefix, upper_bound)
+                                  lower_bound, prefix, upper_bound,
+                                  prefix_hash, robin_karp_substr)
 from tests.utils import substring_pair
 
 
@@ -122,8 +124,9 @@ substr_cases = [('aaa', 'a', 0),
                 ]
 
 
-@pytest.fixture(scope="class", params=[bruteforce_substr, kmp_substr],
-                ids=["brute", "kmp"])
+@pytest.fixture(scope="class",
+                params=[bruteforce_substr, kmp_substr, robin_karp_substr],
+                ids=["brute", "kmp", "robin_karp"])
 def substr_method(request):
     request.cls.substr = staticmethod(request.param)
 
@@ -157,3 +160,14 @@ def test_prefix_invariant(s):
     for i, f in enumerate(p):
         # prefix same as suffix
         assert s[:f] == s[i - f + 1:i + 1]
+
+
+@given(text(string.ascii_lowercase + string.ascii_uppercase))
+def test_prefix_hash(s):
+    assert prefix_hash('', []) == []
+    p = []
+    h = prefix_hash(s, p)
+    for i in range(len(s)):
+        si = s[:i + 1]
+        hi = prefix_hash(si, p)
+        assert h[i] == hi[-1]
