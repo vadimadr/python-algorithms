@@ -155,3 +155,56 @@ def robin_karp_substr(s, t, start, end, P=53):
                 return i
 
     return -1
+
+
+def boyer_moore_substr(s, t, start, end):
+    """
+    Boyer - Moore substring algorithm
+
+    Informal description:
+    Align s and t. Compare s[i] and t[i] from right end. Let u = s[i + 1:] -
+    characters that match t (u == t[j + i + 1:...]) and t[i + j] != s[i]
+    then we must slide s by one of the rules:
+
+    1. Match t[i + j] = c and rightmost s[k] = c
+    2. If u is substring of s (except for u itself) than math u in t and
+    rightmost substring of s == u. (This is the minimal shift to match u again)
+    3. If no substrings found then match longest prefix of s that match its
+    suffix with suffix of u in t
+
+    """
+    m = len(s)
+
+    if m == 0:
+        return 0
+
+    stop_table = {}
+
+    # create table for bad character heuristic
+    # can give negative offsets
+    for i in range(m - 1):  # skip last char
+        # no s[i] in tail of s
+        stop_table[s[i]] = i + 1
+
+    # create table for good suffix heuristic
+    # Boyer–Moore–Horspool (simplified version of this) does not use it.
+    p = prefix(s)
+    pr = prefix(''.join(reversed(s)))
+    suffshift = [m - p[-1]] * m
+    for i in range(m):
+        j = m - pr[i] - 1
+        suffshift[j] = min(i - pr[i] + 1, suffshift[j])
+
+    # compare right to left
+    # slide left to right
+    j = start + m - 1
+    while j < end:
+        i = m - 1
+        while s[i] == t[j]:
+            if i == 0:
+                return j
+            i -= 1
+            j -= 1
+        # chose the best heuristics among two
+        j += max(i - stop_table.get(t[j], m), suffshift[i])
+    return -1

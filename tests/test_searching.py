@@ -7,7 +7,8 @@ from hypothesis.strategies import text
 
 from algorithms.searching import (bruteforce_substr, equal_range, kmp_substr,
                                   lower_bound, prefix, upper_bound,
-                                  prefix_hash, robin_karp_substr)
+                                  prefix_hash, robin_karp_substr,
+                                  boyer_moore_substr)
 from tests.utils import substring_pair
 
 
@@ -125,8 +126,8 @@ substr_cases = [('aaa', 'a', 0),
 
 
 @pytest.fixture(scope="class",
-                params=[bruteforce_substr, kmp_substr, robin_karp_substr],
-                ids=["brute", "kmp", "robin_karp"])
+                params=[bruteforce_substr, kmp_substr, robin_karp_substr, boyer_moore_substr],
+                ids=["brute", "kmp", "robin_karp", "bm"])
 def substr_method(request):
     request.cls.substr = staticmethod(request.param)
 
@@ -171,3 +172,7 @@ def test_prefix_hash(s):
         si = s[:i + 1]
         hi = prefix_hash(si, p)
         assert h[i] == hi[-1]
+
+
+def test_bm():
+    assert boyer_moore_substr('abcdadcd', '', 0, 0)
