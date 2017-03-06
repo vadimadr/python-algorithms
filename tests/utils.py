@@ -1,11 +1,11 @@
-import string
 import os
+import string
 from random import randint, random
 
 import numpy as np
 from hypothesis.extra.numpy import arrays
-from hypothesis.strategies import composite, floats, integers, text, \
-    sampled_from
+from hypothesis.strategies import (composite, floats, integers, sampled_from,
+                                   text)
 
 _dir = os.path.dirname(__file__)
 
