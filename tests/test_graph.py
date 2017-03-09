@@ -8,6 +8,7 @@ from scipy.sparse import csgraph as scipy_graph
 from algorithms.graph import (AdjMxGraph, AdjSetGraph, EdgeListGraph,
                               is_complete_graph, subgraph, to_adjacency_list,
                               to_adjacency_matrix, to_edge_list, to_undirected)
+from algorithms.graph.problems import find_cycle
 from algorithms.graph.searching import (bfs, bfs_iter, dfs_iter,
                                         dijkstra_search, restore_path)
 
@@ -30,6 +31,11 @@ s6 = [(0, 1), (0, 2), (0, 3), (0, 4), (0, 5)]
 
 # cycle graph
 c5 = [(0, 1), (1, 2), (2, 3), (3, 4), (4, 0)]
+c5_labeled = [('a', 'b'), ('b', 'c'), ('c', 'd'), ('d', 'e'), ('e', 'a')]
+
+
+def labeled_path(path, labels):
+    return [labels[i] for i in path]
 
 
 @pytest.fixture(scope="class", params=[AdjMxGraph, AdjSetGraph, EdgeListGraph],
@@ -243,14 +249,19 @@ class TestSearch:
         for directed, preorder in product([True, False], [True, False]):
             g1 = self.graph.from_edge_list(c5, directed=directed)
             g2 = self.graph.from_adjacency_matrix(graph, directed=directed)
+            g3 = self.graph.from_edge_list(c5_labeled, directed=directed)
 
             dfs1 = list(dfs_iter(g1, 0, preorder=preorder))
             dfs2 = list(dfs_iter(g2, 0, preorder=preorder))
+            dfs3 = list(dfs_iter(g3, 'a', preorder=preorder))
+
             path1_ = path1 if preorder else reversed(path1)
             path2_ = path2 if preorder else reversed(path2)
 
             assert all(map(eq, dfs1, path1_))
             assert all(map(eq, dfs2, path2_))
+            assert all(map(eq, dfs3, labeled_path(path1_, 'abcde'))) or \
+                   all(map(eq, dfs3, labeled_path([0, 4, 3, 2, 1], 'abcde')))
 
     def test_bfs_iter(self):
         graph = np.array([[0, 1, 2, 0, 0],
@@ -266,15 +277,20 @@ class TestSearch:
         for directed in (True, False):
             g1 = self.graph.from_edge_list(c5, directed=directed)
             g2 = self.graph.from_adjacency_matrix(graph, directed=directed)
+            g3 = self.graph.from_edge_list(c5_labeled, directed=directed)
 
             bfs1 = list(bfs_iter(g1, 0))
             bfs2 = list(bfs_iter(g2, 0))
+            bfs3 = list(bfs_iter(g3, 'a'))
 
             assert all(map(eq, bfs2, path3))
             if not directed:
                 assert all(map(eq, bfs1, path1))
+                # search order is not unique ( depends on enumeration order )
+                # assert all(map(eq, bfs3, labeled_path(path1, 'abcde')))
             else:
                 assert all(map(eq, bfs1, path2))
+                assert all(map(eq, bfs3, labeled_path(path2, 'abcde')))
 
     def test_bfs_order(self):
         for directed in (True, False):
@@ -338,3 +354,9 @@ class TestSearch:
         P_[P_ == -9999] = -1
         assert (np.array(P, dtype=int) - P_ == 0).all()
         assert (np.array(P, dtype=float) - P_ < 1e-6).all()
+
+    def test_find_cycle(self):
+        test_edges = [(1, 2), (1, 3), (2, 3), (2, 4), (3, 4)]
+        g = self.graph.from_edge_list(test_edges)
+        cycle = find_cycle(g, 1)
+        assert cycle is not False

@@ -41,8 +41,8 @@ class BaseGraph(ABC, metaclass=ABCMeta):
     # Each node has internal id from 0 to |V| - 1
 
     # To implement graph structure methods
-    # init(), add_node(), remove_node(), distance() should be overriden
-    # additionally enumerating methods (successors(), predcessors(), ...)
+    # init(), add_node(), remove_node(), distance() should be overridden
+    # additionally enumerating methods (successors(), predecessors(), ...)
     # may be overridden for efficiency. It is obligatory if graph is multigraph
 
     def order(self):
@@ -263,6 +263,10 @@ class BaseGraph(ABC, metaclass=ABCMeta):
     @property
     def directed(self):
         return self._directed
+
+    @property
+    def id(self):
+        return self._nodes
 
 
 class AdjMxGraph(BaseGraph):
