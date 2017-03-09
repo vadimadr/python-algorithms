@@ -184,6 +184,13 @@ def to_unweighted(g: BaseGraph):
     return g_new
 
 
+def nodes_ids_to_labels(g: BaseGraph, l):
+    """Given list l of node ids convert to correct node labels"""
+    g_ = ((id_, label) for label, id_ in zip(g, range(g.order())))
+    names = dict(g_)
+    return [names[i] for i in l]
+
+
 def is_complete_graph(g: BaseGraph):
     n = g.order()
     for u in g:
