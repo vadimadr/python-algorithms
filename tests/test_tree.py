@@ -1,5 +1,8 @@
 from math import inf
 
+from hypothesis import given
+from hypothesis.strategies import lists, integers
+
 from algorithms.structures.tree import BinaryTree
 
 
@@ -49,3 +52,9 @@ def test_bst_delete():
         assert i not in bst_t
     bst_t.delete(44)
     assert bst_invariant(bst_t)
+
+
+@given(lists(integers()))
+def test_bst_invariant(t):
+    bst = BinaryTree.from_list(t)
+    assert bst_invariant(bst)
