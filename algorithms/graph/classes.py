@@ -54,23 +54,19 @@ class BaseGraph(ABC, metaclass=ABCMeta):
 
     def __iter__(self):
         # enumerate all nodes
-        yield from self._nodes
+        yield from range(self._n_nodes)
 
     def __getitem__(self, item):
         yield from self.neighbours(item)
 
     def __contains__(self, item):
-        return item in self._nodes
+        return self.has_node(item)
 
     def __init__(self, weighted=False, directed=False, *args, **kwargs):
         self._weighted = weighted
         self._directed = directed
         self._n_nodes = 0  # |V|
         self._n_edges = 0  # |E|
-
-        # Mapping from node name to node id
-        # e.g. {'Ivan': 0, 'Bob': 1, ...}
-        self._nodes = {}
 
     @classmethod
     def from_edge_list(cls, edge_list, *args, **kwargs):
@@ -118,11 +114,10 @@ class BaseGraph(ABC, metaclass=ABCMeta):
                     graph.add_edge(u, v, w)
 
     def add_node(self, u):
-        if u in self._nodes:
+        if u < self._n_nodes:
             raise Exception('Node already exists')
 
-        self._nodes[u] = self._n_nodes
-        self._n_nodes += 1
+        self._n_nodes = u + 1
 
     def remove_node(self, u):
         # isolates node
@@ -134,15 +129,13 @@ class BaseGraph(ABC, metaclass=ABCMeta):
             self.remove_edge(u, v)
 
     def has_node(self, u):
-        return u in self._nodes
+        return u < self._n_nodes
 
     def has_edge(self, u, v):
         return self.distance(u, v) > 0
 
     def distance(self, u, v):
-        if u not in self._nodes:
-            return 0
-        if v not in self._nodes:
+        if max(u, v) >= self._n_nodes:
             return 0
 
     def add_edge(self, u, v, weight=None):
@@ -152,9 +145,9 @@ class BaseGraph(ABC, metaclass=ABCMeta):
         if not self.has_edge(u, v):
             self._n_edges += 1
 
-        if u not in self._nodes:
+        if not self.has_node(u):
             self.add_node(u)
-        if v not in self._nodes:
+        if not self.has_node(v):
             self.add_node(v)
 
     def add_edges_from(self, edges):
@@ -168,25 +161,25 @@ class BaseGraph(ABC, metaclass=ABCMeta):
         # if an arrow (x,y) exists,
         # then y is said to be a direct successor of x
 
-        for name, node in self._nodes.items():
-            d = self.distance(v, node)
+        for i in range(self._n_nodes):
+            d = self.distance(v, i)
             if d > 0:
                 if self._weighted:
-                    yield v, name, d
+                    yield i, d
                 else:
-                    yield v, name
+                    yield i
 
     def predecessors(self, v):
         # if an arrow (x,y) exists,
         # then x is said to be a direct predecessor of y
 
-        for name, node in self._nodes.items():
-            d = self.distance(node, v)
+        for i in range(self._n_nodes):
+            d = self.distance(i, v)
             if d > 0:
                 if self._weighted:
-                    yield v, name, d
+                    yield i, d
                 else:
-                    yield v, name
+                    yield i
 
     def neighbours(self, v):
         # Enumerate all adjacent nodes
@@ -220,42 +213,6 @@ class BaseGraph(ABC, metaclass=ABCMeta):
         else:
             return self.out_degree(v)
 
-    def _get_id(self, *nodes):
-        if len(nodes) is 1:
-            return self._nodes.get(nodes[0])
-        return tuple(self._nodes.get(v) for v in nodes)
-
-    def _get_names(self, ids):
-        # for given node id yield node name
-
-        id_set = frozenset(ids)
-        for node_name, node_id in self._nodes.items():
-            if node_id in id_set:
-                yield node_name
-
-    def _get_edges(self, u, edges):
-        """
-        Iterate all edges in the form (u, v, weight)
-
-        :param u: heading node name (i.e. "A")
-        :param edges: list of tailing nodes or pairs (node, weight)
-        :return: all edges from node u given in a list
-        """
-
-        if self._weighted:
-            id_set = dict(edges)
-        else:
-            id_set = frozenset(edges)
-
-        if self._weighted:
-            for node_name, node_id in self._nodes.items():
-                if node_id in id_set:
-                    yield node_name, id_set[node_id]
-        else:
-            for node_name, node_id in self._nodes.items():
-                if node_id in id_set:
-                    yield node_name
-
     @property
     def weighted(self):
         return self._weighted
@@ -263,10 +220,6 @@ class BaseGraph(ABC, metaclass=ABCMeta):
     @property
     def directed(self):
         return self._directed
-
-    @property
-    def id(self):
-        return self._nodes
 
 
 class AdjMxGraph(BaseGraph):
@@ -302,18 +255,16 @@ class AdjMxGraph(BaseGraph):
         if not self._weighted:
             weight = 1
 
-        u, v = self._get_id(u, v)
-
         self._mx[u, v] = weight
 
         if not self._directed:
             self._mx[v, u] = weight
 
     def remove_edge(self, u, v):
-        super().remove_edge(u, v)
-        u, v = self._get_id(u, v)
-        if u is None or v is None:
+        if max(u, v) >= self._n_nodes:  # node does not exist
             return
+
+        super().remove_edge(u, v)
 
         if not self._directed:
             self._mx[v, u] = 0
@@ -321,27 +272,24 @@ class AdjMxGraph(BaseGraph):
         self._mx[u, v] = 0
 
     def predecessors(self, v):
-        v_id = self._get_id(v)
-        ids = np.where(self._mx[..., v_id] > 0)[0]
+        ids = np.where(self._mx[..., v] > 0)[0]
         if self._weighted:
-            weights = self._mx[v_id, ids]
-            yield from self._get_edges(v, zip(ids, weights))
+            weights = self._mx[v, ids]
+            yield from zip(ids, weights)
         else:
-            yield from self._get_edges(v, ids)
+            yield from ids
 
     def successors(self, v):
-        v_id = self._get_id(v)
-        ids = np.where(self._mx[v_id] > 0)[0]
+        ids = np.where(self._mx[v] > 0)[0]
         if self._weighted:
-            weights = self._mx[v_id, ids]
-            yield from self._get_edges(v, zip(ids, weights))
+            weights = self._mx[v, ids]
+            yield from zip(ids, weights)
         else:
-            yield from self._get_edges(v, ids)
+            yield from ids
 
     def distance(self, u, v):
         if super().distance(u, v) is 0:
             return 0
-        u, v = self._get_id(u, v)
 
         return self._mx[u, v]
 
@@ -362,16 +310,19 @@ class AdjSetGraph(BaseGraph):
 
     def add_node(self, u):
         super().add_node(u)
-        node = {} if self._weighted else set()
-        self._graph.append(node)
+        # add nodes from |g| to u
+        for i in range(u - len(self._graph) + 1):
+            node = dict() if self._weighted else set()
+            self._graph.append(node)
 
     def add_edge(self, u, v, weight=None):
         super().add_edge(u, v, weight)
         if not self._weighted:
             weight = 1
-        u, v = self._get_id(u, v)
         if self._weighted:
             self._graph[u][v] = weight
+            if not self._directed:
+                self._graph[u][v] = weight
         else:
             self._graph[u].add(v)
             if not self._directed:
@@ -380,36 +331,34 @@ class AdjSetGraph(BaseGraph):
     def distance(self, u, v):
         if super().distance(u, v) is 0:
             return 0
-        u, v = self._get_id(u, v)
         if self._weighted:
             return self._graph[u].get(v, 0)
         else:
             return 1 if v in self._graph[u] else 0
 
     def successors(self, v):
-        v_id = self._get_id(v)
-        yield from self._get_edges(v, self._graph[v_id])
+        if self.weighted:
+            yield from self._graph[v].items()
+        else:
+            yield from self._graph[v]
 
     def predecessors(self, v):
-        v_id = self._get_id(v)
-
         ids = []
         if not self._weighted:
             for u, adj_set in enumerate(self._graph):
-                if v_id in adj_set:
+                if v in adj_set:
                     ids.append(u)
-            yield from self._get_edges(v, ids)
+            yield from ids
         else:
             weights = []
             for u, adj_set in enumerate(self._graph):
-                if v_id in adj_set:
+                if v in adj_set:
                     ids.append(u)
-                    weights.append(adj_set[v_id])
-            yield from self._get_edges(v, zip(ids, weights))
+                    weights.append(adj_set[v])
+            yield from zip(ids, weights)
 
     def remove_edge(self, u, v):
         super().remove_edge(u, v)
-        u, v = self._get_id(u, v)
         if u is None or v is None:
             return
 
@@ -442,8 +391,6 @@ class EdgeListGraph(BaseGraph):
     def add_edge(self, u, v, weight=None):
         super().add_edge(u, v, weight)
 
-        u, v = self._get_id(u, v)
-
         if self._weighted:
             node = (u, v, weight)
             node_reversed = (v, u, weight)
@@ -458,16 +405,13 @@ class EdgeListGraph(BaseGraph):
             insort(self._edges, node_reversed)
 
     def remove_edge(self, u, v):
-        super().remove_edge(u, v)
-        u, v = self._get_id(u, v)
-        if u is None or v is None:
+        if max(u, v) >= self._n_nodes:
             return
 
         # binary search for edge
         i = bisect_left(self._edges, (u, v))
         # edge found
         if i != len(self._edges):
-
             node = self._edges[i]
             if node[0] == u and node[1] == v:
                 self._edges.pop(i)
@@ -478,12 +422,11 @@ class EdgeListGraph(BaseGraph):
                 node = self._edges[i_reversed]
                 if node[1] == u and node[0] == v:
                     self._edges.pop(i_reversed)
+        super().remove_edge(u, v)
 
     def distance(self, u, v):
         if super().distance(u, v) == 0:
             return 0
-
-        u, v = self._get_id(u, v)
 
         # binary search for edge
         i = bisect_left(self._edges, (u, v))
@@ -501,9 +444,8 @@ class EdgeListGraph(BaseGraph):
         return 0
 
     def successors(self, v):
-        v_id = self._get_id(v)
 
-        i = bisect_left(self._edges, (v_id, 0))
+        i = bisect_left(self._edges, (v, 0))
 
         ids = []
         weights = []
@@ -511,7 +453,7 @@ class EdgeListGraph(BaseGraph):
         if i != len(self._edges):
             node = self._edges[i]
 
-            while node[0] == v_id:
+            while node[0] == v:
                 ids.append(node[1])
 
                 if self._weighted:
@@ -523,9 +465,9 @@ class EdgeListGraph(BaseGraph):
 
                 node = self._edges[i]
         if self._weighted:
-            yield from self._get_edges(v, zip(ids, weights))
+            yield from zip(ids, weights)
         else:
-            yield from self._get_edges(v, ids)
+            yield from ids
 
 
 class HashListGraph(BaseGraph):
@@ -540,8 +482,6 @@ class HashListGraph(BaseGraph):
         if super().distance(u, v) == 0:
             return 0
 
-        u, v = self._get_id(u, v)
-
         h = hash((u, v))
 
         while self._used[h]:
@@ -555,7 +495,7 @@ class HashListGraph(BaseGraph):
                 h = (h + 1) % self._size
         return 0
 
-    def add_edge(self, u, v, weight):
+    def add_edge(self, u, v, weight=None):
         super().add_edge(u, v, weight)
 
         u, v = self._get_id(u, v)

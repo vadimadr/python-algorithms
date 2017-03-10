@@ -81,17 +81,10 @@ def to_adjacency_matrix(g: BaseGraph):
     n = g.order()
 
     mx = np.zeros((n, n))
-    names = {k: v for k, v in zip(g, range(n))}
-
     for u in g:
         for v in g.successors(u):
-            if g.weighted:
-                ui, vi, w = names[u], names[v[0]], v[1]
-            else:
-                ui, vi, w = names[u], names[v], 1
-
-            mx[ui, vi] = w
-
+            w = v[1] if g.weighted else 1
+            mx[u, v] = w
     return mx
 
 
@@ -145,7 +138,7 @@ def subgraph(g: BaseGraph, nodes):
 
     weighted = g.weighted
     directed = g.directed
-    g_new = g.__class__(weighted=weighted, directed=directed)
+    g_new = g.__class__(weighted=weighted, directed=True)
 
     for u in g:
         if u in nodes:
@@ -155,6 +148,8 @@ def subgraph(g: BaseGraph, nodes):
 
                 elif v in nodes:
                     g_new.add_edge(u, v)
+
+    g_new._directed = directed
     return g_new
 
 
@@ -254,13 +249,6 @@ def to_unweighted(g: BaseGraph):
             else:
                 g_new.add_edge(u, v)
     return g_new
-
-
-def nodes_ids_to_labels(g: BaseGraph, l):
-    """Given list l of node ids convert to correct node labels"""
-    g_ = ((id_, label) for label, id_ in zip(g, range(g.order())))
-    names = dict(g_)
-    return [names[i] for i in l]
 
 
 def is_complete_graph(g: BaseGraph):

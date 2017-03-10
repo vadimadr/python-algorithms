@@ -170,16 +170,6 @@ class TestGraphBasics:
         for u in g:
             assert g.degree(u) == 4
 
-    def test_named(self):
-        s5_named = [('a', 'b'), ('a', 'c'), ('a', 'd'), ('a', 'e')]
-        g = self.graph.from_edge_list(s5_named)
-
-        for u in g:
-            if u == 'a':
-                assert g.degree(u) == 4
-            else:
-                assert g.degree(u) == 1
-
 
 def test_normalize_edge_list():
     e1 = [('a', 'b'), ('b', 'c'), ('c', 'a')]
