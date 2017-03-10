@@ -10,6 +10,10 @@ class BaseTree:
     def leaf(self):
         return len(self.children) == 0
 
+    @property
+    def root(self):
+        return self.parent is None
+
     def depth_first(self):
         yield self
         for c in self.children:
