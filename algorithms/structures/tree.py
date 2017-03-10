@@ -40,6 +40,10 @@ class BinaryTree(BaseTree):
         self.key = key
 
     def add(self, key):
+        if self.key is None:
+            self.key = key
+            return
+
         parent = self.search(key)
 
         if key == parent.key:
@@ -66,7 +70,75 @@ class BinaryTree(BaseTree):
         return node
 
     def delete(self, key):
-        pass
+        v = self.search(key)
+        if v.key != key:
+            return
+        p = v.parent
+        if p is not None:
+            i = 0 if p.left is v else 1
+
+        # deleted node is leaf
+        if v.leaf:
+            if p is not None:
+                p.children[i] = None
+            else:
+                v.key = None
+            return
+
+        # deleted node has one child
+        if v.left is None or v.right is None:
+            u = v.left or v.right
+            u.parent = p
+            if p is not None:
+                p.children[i] = u
+            else:
+                v.key = u.key
+                v.children = u.children
+            return
+
+        # deleted node has two children
+        # swap v and its predecessor
+        u = v.successor()
+        v.key = u.key
+        if u.parent.left is u:
+            u.parent.left = u.right
+        else:
+            u.parent.right = u.right
+        if u.right is not None:
+            u.right.parent = u.parent
+
+    def successor(self):
+        """return node with key, that is successor of current node key"""
+
+        # all elements in right subtree > key
+        if self.right is not None:
+            u = self.right
+            # find minimum in right subtree (all left nodes)
+            while u.left is not None:
+                u = u.left
+            return u
+        # all parents of right subtree < key, thus move upwards until we are
+        # in left subtree
+        u = self
+        p = u.parent
+        while p is not None and u == p.right:
+            u = p
+            p = u.parent
+        return p
+
+    def predecessor(self):
+        """return node with key, that is predecessor of current node key"""
+        if self.left is not None:
+            u = self.left
+            while u.right is not None:
+                u = u.right
+            return u
+        u = self
+        p = u.parent
+        while p is not None and u == p.left:
+            u = p
+            p = u.parent
+        return p
 
     def _get_child(self, i):
         if len(self.children) != 0:
