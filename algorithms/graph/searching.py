@@ -49,9 +49,6 @@ def dfs(g: BaseGraph, u):
     time_out = [0] * V
     timestamp = 0
 
-    # name -> id
-    names = dict(zip(g, range(V)))
-
     def dfs_visit(v):
         nonlocal timestamp
         colors[v] = 1
@@ -59,7 +56,6 @@ def dfs(g: BaseGraph, u):
         timestamp += 1
 
         for w in g.successors(v):
-            w = names[w]
             if colors[w] == 0:
                 dfs_visit(w)
         colors[v] = 2
@@ -67,9 +63,8 @@ def dfs(g: BaseGraph, u):
         timestamp += 1
 
     for v in g:
-        w = names[v]
-        if colors[w] == 0:
-            dfs_visit(w)
+        if colors[v] == 0:
+            dfs_visit(v)
     return time_in, time_out
 
 
@@ -140,14 +135,13 @@ def bfs_iter(g, v):
     n = g.order()  # |V|
     used = [False] * n
     q = deque((v,))
-    used[g.id[v]] = True
+    used[v] = True
 
     while q:
         u = q.popleft()
         for u_ in g.successors(u):
-            u_id = g.id[u_]
-            if not used[u_id]:
-                used[u_id] = True
+            if not used[u_]:
+                used[u_] = True
                 q.append(u_)
         yield u
 
@@ -201,9 +195,8 @@ def dijkstra_search(g: BaseGraph, u):
         # unused node with minimal distance (d[v])
         v = None
         for v_ in unused:
-            v_id = g.id[v_]
-            if v is None or d[v_id] < d[v]:
-                v = v_id
+            if v is None or d[v_] < d[v]:
+                v = v_
 
         # unreachable from u, end of connected component
         if d[v] == inf:
@@ -212,10 +205,9 @@ def dijkstra_search(g: BaseGraph, u):
 
         # relaxation
         for u_, dist in g.successors(v):
-            u_id = g.id[u_]
             relaxed = d[v] + dist
             if relaxed < d[u_]:
-                p[u_id] = v
-                d[u_id] = relaxed
+                p[u_] = v
+                d[u_] = relaxed
 
     return d, p
