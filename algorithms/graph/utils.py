@@ -5,6 +5,78 @@ import numpy as np
 from algorithms.graph import BaseGraph
 
 
+class NodeMapping:
+    """Graphs with labeled nodes is not the fundamental graph theory
+    problem, so use this utility class if you need labeled vertices"""
+
+    def __init__(self, labels):
+        labels = sorted(labels)
+
+        # id -> label
+        self.label = dict((i, label) for i, label in enumerate(labels))
+
+        # label -> id
+        self.id = dict((label, i) for i, label in enumerate(labels))
+
+    def add(self, label, node=None):
+        if node is None:
+            node = len(self.label)
+
+        self.id[label] = node
+        self.label[node] = label
+
+
+def normalize_adjacency_dict(adj_dict):
+    """For a given adjacency dict return unlabeled adjacency list and node
+    mapping"""
+    labels = set()
+
+    for node, adjacent in adj_dict.items():
+        labels.add(node)
+        labels.update(adjacent)
+
+    mapping = NodeMapping(labels)
+
+    adj_list = [None] * len(labels)
+
+    for i in range(len(labels)):
+        adj_list[i] = []
+
+    for node, adjacent in adj_dict.items():
+        adj_list[mapping.id[node]] = [mapping.id[i] for i in adjacent]
+
+    return adj_list, mapping
+
+
+def normalize_edge_list(edges, weighted=None):
+    """For a given edge list return unlabeled edge list and node mapping"""
+
+    if weighted is None:
+        e = edges[0]
+        weighted = len(e) > 2
+
+    labels = set()
+
+    for e in edges:
+        u, v = e[:2]
+        labels.add(u)
+        labels.add(v)
+
+    mapping = NodeMapping(labels)
+    new_edges = []
+
+    for e in edges:
+        u, v = e[:2]
+        if weighted:
+            e_ = (mapping.id[u], mapping.id[v], e[2])
+            new_edges.append(e_)
+        else:
+            e_ = (mapping.id[u], mapping.id[v])
+            new_edges.append(e_)
+
+    return new_edges, mapping
+
+
 def to_adjacency_matrix(g: BaseGraph):
     n = g.order()
 

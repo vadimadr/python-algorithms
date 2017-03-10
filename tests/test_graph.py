@@ -11,6 +11,8 @@ from algorithms.graph import (AdjMxGraph, AdjSetGraph, EdgeListGraph,
 from algorithms.graph.problems import find_cycle
 from algorithms.graph.searching import (bfs, bfs_iter, dfs_iter,
                                         dijkstra_search, restore_path)
+from algorithms.graph.utils import normalize_edge_list, \
+    normalize_adjacency_dict
 
 k5 = [(0, 1), (0, 2), (0, 3), (0, 4), (1, 2), (1, 3), (1, 4), (2, 3), (2, 4),
       (3, 4)]
@@ -178,6 +180,30 @@ class TestGraphBasics:
                 assert g.degree(u) == 4
             else:
                 assert g.degree(u) == 1
+
+
+def test_normalize_edge_list():
+    e1 = [('a', 'b'), ('b', 'c'), ('c', 'a')]
+    e2 = [(1, 2, 0.3), (2, 5, 0.6), (1, 3, 2.5), (3, 5, 0.1)]
+
+    e1_, _ = normalize_edge_list(e1)
+    e2_, m = normalize_edge_list(e2)
+
+    assert e1_ == [(0, 1), (1, 2), (2, 0)]
+    assert e2_ == [(0, 1, 0.3), (1, 3, 0.6), (0, 2, 2.5), (2, 3, 0.1)]
+
+    for i, e in enumerate(e2):
+        u, v, _ = e
+        assert u == m.label[e2_[i][0]]
+        assert v == m.label[e2_[i][1]]
+
+
+def test_normalize_adj_dict():
+    d1 = {'a': ['b', 'c', 'd'], 'b': ['a', 'c'], 'd': ['a']}
+
+    d1_, _ = normalize_adjacency_dict(d1)
+
+    assert d1_ == [[1, 2, 3], [0, 2], [], [0]]
 
 
 @pytest.mark.usefixtures("graph_cls")
