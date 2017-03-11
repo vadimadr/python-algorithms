@@ -69,12 +69,27 @@ def euler_graph_test(g: Graph):
     """Test whether g is euler graph"""
 
     # Number of odd vertices is 0 or 2 (start and end of euler path)
-    n_odd = 0
+    p = None  # start of path
+    q = None  # end of path
     for v in g:
         if g.degree(v) % 2 == 1:
-            n_odd += 1
-    if n_odd > 2:
-        return False
+            if g.directed:
+                if g.in_degree(v) == g.out_degree(v) - 1:
+                    if p is not None:  # there is only one starting node
+                        return False
+                    p = v
+                else:
+                    if q is not None:
+                        return False
+                    q = v
+            # for undirected graphs only parity of node is important
+            else:
+                if p is None:
+                    p = v
+                elif q is None:
+                    q = v
+                else:
+                    return False
 
     # Only one connected component
     visited = [False] * g.order()
@@ -88,3 +103,41 @@ def euler_graph_test(g: Graph):
             dfs_done = True
 
     return True
+
+
+def euler_path(g: Graph):
+    """Find euler path or cycle
+
+    Correctness:
+    1. every edge is visited once (because edges are deleted and algorithm
+    won't stop while there is edges left
+    2. p forms up a correct path
+
+    so p is the euler path
+    """
+    if not euler_graph_test(g):
+        return False
+
+    # if there is an odd vertex, then start from it
+    v = None
+    for u in g:
+        if g.degree(u) % 2 == 1:
+            if not g.directed or g.in_degree(u) == g.out_degree(u) - 1:
+                v = u
+                break
+        if v is None and g.degree(u) > 0:
+            v = u
+
+    p = []
+    s = [v]  # stack can be replaced with simple recursive solution
+    while s:
+        w = s[-1]
+        for u in g.successors(w):
+            s.append(u)
+            g.remove_edge(w, u)
+            break
+        # all incident edges are processed
+        if w == s[-1]:
+            p.append(s.pop())
+    p.reverse()
+    return p
