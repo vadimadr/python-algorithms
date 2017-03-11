@@ -8,7 +8,8 @@ from scipy.sparse import csgraph as scipy_graph
 from algorithms.graph import (AdjMxGraph, AdjSetGraph, EdgeListGraph,
                               is_complete_graph, subgraph, to_adjacency_list,
                               to_adjacency_matrix, to_edge_list, to_undirected)
-from algorithms.graph.problems import find_cycle, topological_sort
+from algorithms.graph.problems import find_cycle, topological_sort, \
+    euler_graph_test
 from algorithms.graph.searching import (bfs, bfs_iter, dfs_iter,
                                         dijkstra_search, restore_path)
 from algorithms.graph.utils import normalize_edge_list, \
@@ -375,3 +376,18 @@ class TestSearch:
         assert topological_sort(g1) == [0, 3, 2, 1]
         g2 = self.graph.from_edge_list(g2_, directed=True)
         assert not topological_sort(g2)
+
+    def test_euler_graph(self):
+        g1_ = [(0, 1), (0, 2), (1, 3), (1, 5), (2, 1), (2, 3), (3, 0), (3, 4),
+               (4, 0), (4, 2), (5, 2)]
+        g2_ = [(0, 1), (1, 2), (2, 0), (3, 4), (4, 5), (5, 3)]  # two triangles
+        g3_ = [(0, 3), (0, 4), (3, 1), (3, 2), (1, 2), (2, 0), (4, 1)]
+
+        for directed in (True, False):
+            g1 = self.graph.from_edge_list(g1_, directed=directed)
+            g2 = self.graph.from_edge_list(g2_, directed=directed)
+            g3 = self.graph.from_edge_list(g3_, directed=directed)
+
+            assert euler_graph_test(g1)
+            assert not euler_graph_test(g2)
+            assert not euler_graph_test(g3)
