@@ -1,4 +1,5 @@
-from algorithms.geometry import Vec2, orthogonal, Vec3, l2
+from algorithms.geometry import Vec2, orthogonal, Vec3, l2, orientation, \
+    vec2_prod, vec3_prod
 from tests.utils import float_eq
 
 
@@ -36,3 +37,34 @@ def test_l2():
 
     x1 = Vec3(1.3, 7.2, 3.4)
     assert float_eq(l2(x1), 8.0678373806)
+
+
+def test_triple_orientation():
+    p0 = Vec2(-3, 2)
+    p1 = Vec2(-5, 3)
+    p2 = Vec2(-1, -1)
+
+    assert orientation(p0, p1, p2) > 0
+    assert orientation(p1, p0, p2) < 0
+    assert orientation(p0, p1, p1) == 0
+
+    e0 = Vec3(1, 0, 0)
+    e1 = Vec3(0, 1, 0)
+    e2 = Vec3(0, 0, 1)
+    assert orientation(e0, e1, e2) > 0
+    assert orientation(e0, e2, e1) < 0
+
+
+def test_vec2_prod():
+    a = Vec2(4, 0)
+    b = Vec2(2, 2)
+    assert vec2_prod(a, b) == 8
+
+
+def test_vec3_prod():
+    a = Vec3(1, 2.5, 3)
+    b = Vec3(.7, 1.4, 0)
+    c = vec3_prod(a, b)
+    assert orthogonal(a, c)
+    assert orthogonal(b, c)
+    assert orientation(a, b, c) > 0
