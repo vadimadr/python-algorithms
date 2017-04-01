@@ -1,6 +1,6 @@
 from collections import namedtuple
 
-from math import sqrt
+from math import sqrt, gcd
 
 eps = 1e-14
 Vec2 = namedtuple('Vec2', ['x', 'y'])
@@ -65,8 +65,33 @@ def orientation(a, b, c):
         return a.x * (b.y - c.y) + b.x * (c.y - a.y) + c.x * (a.y - b.y)
 
     return a.x * b.y * c.z \
-        + a.y * b.z * c.x \
-        + a.z * b.x * c.y \
-        - a.x * b.z * c.y \
-        - a.y * b.x * c.z \
-        - a.z * b.y * c.x
+           + a.y * b.z * c.x \
+           + a.z * b.x * c.y \
+           - a.x * b.z * c.y \
+           - a.y * b.x * c.z \
+           - a.z * b.y * c.x
+
+
+def line(p, q, normed='unit'):
+    """Find line equation for ax + by + c = 0, through given points p and q"""
+    # Solve [p - q, x] == 0
+    a = q.y - p.y
+    b = p.x - q.x
+    c = -a * p.x - b * p.y
+
+    if normed is None:
+        return a, b, c
+    if normed == 'unit':
+        # unit length normal vector
+        z = sqrt(a * a + b * b)
+        if abs(z) > eps:
+            a, b, c = a / z, b / z, c / z
+    if normed == 'gcd':
+        # if p and q are integers, then a, b, c are integers
+        z = gcd(gcd(a, b), c)
+        if z != 0:
+            a, b, c = a // z, b // z, c // z
+    if normed is not None and a < 0:
+        a, b, c = -a, -b, -c
+
+    return a, b, c

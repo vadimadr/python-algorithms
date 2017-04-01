@@ -1,5 +1,9 @@
+from hypothesis import given
+from hypothesis.strategies import floats, tuples, integers
+from math import hypot, isclose
+
 from algorithms.geometry import Vec2, orthogonal, Vec3, l2, orientation, \
-    vec2_prod, vec3_prod
+    vec2_prod, vec3_prod, line
 from tests.utils import float_eq
 
 
@@ -68,3 +72,25 @@ def test_vec3_prod():
     assert orthogonal(a, c)
     assert orthogonal(b, c)
     assert orientation(a, b, c) > 0
+
+
+reals = floats(min_value=-10000, max_value=10000)
+ints = integers(-10000, 10000)
+
+
+@given(tuples(reals, reals, reals, reals))
+def test_line(t):
+    px, py, qx, qy = t
+    p = Vec2(px, py)
+    q = Vec2(qx, qy)
+    a, b, c = line(p, q)
+    assert isclose(a * px + b * py + c, 0, abs_tol=1e-6)
+
+
+@given(tuples(ints, ints, ints, ints))
+def test_line(t):
+    px, py, qx, qy = t
+    p = Vec2(px, py)
+    q = Vec2(qx, qy)
+    a, b, c = line(p, q, 'gcd')
+    assert a * px + b * py + c == 0
