@@ -88,9 +88,12 @@ def test_line(t):
 
 
 @given(tuples(ints, ints, ints, ints))
-def test_line(t):
+def test_line_int(t):
     px, py, qx, qy = t
     p = Vec2(px, py)
     q = Vec2(qx, qy)
     a, b, c = line(p, q, 'gcd')
+    assert isinstance(a, int)
+    assert isinstance(b, int)
+    assert isinstance(c, int)
     assert a * px + b * py + c == 0
