@@ -4,7 +4,7 @@ from math import hypot, isclose, sqrt
 
 from algorithms.geometry import Vec2, orthogonal, Vec3, l2, orientation, \
     vec2_prod, vec3_prod, line, Line2, distance_to_line, line_projection, \
-    line_parallel, line_same, line_intersect
+    line_parallel, line_same, line_intersect, segment_intersection
 from tests.utils import float_eq
 
 
@@ -140,3 +140,24 @@ def test_line_intersect():
     l2 = Line2(2, 2, 8)
 
     assert not line_intersect(l1, l2)
+
+
+def test_segment_intersect():
+    # normal
+    a, b, c, d = Vec2(1, 1), Vec2(4, 2), Vec2(5, -2), Vec2(2, 2)
+    assert segment_intersection(a, b, c, d)
+    # not cross
+    a, b, c, d = Vec2(1, 1), Vec2(4, 2), Vec2(5, -2), Vec2(2, 1)
+    assert not segment_intersection(a, b, c, d)
+    # vertical
+    a, b, c, d = Vec2(1, 1), Vec2(4, 2), Vec2(3, 0), Vec2(3, 5)
+    assert segment_intersection(a, b, c, d)
+    # horiz
+    a, b, c, d = Vec2(1, 1), Vec2(4, 2), Vec2(1, 1), Vec2(6, 1)
+    assert segment_intersection(a, b, c, d)
+    # one point
+    a, b, c, d = Vec2(1, 1), Vec2(4, 2), Vec2(1, 1), Vec2(1,1)
+    assert segment_intersection(a, b, c, d)
+    # two point
+    a, b, c, d = Vec2(1, 1), Vec2(1,1), Vec2(1, 1), Vec2(1,1)
+    assert segment_intersection(a, b, c, d)

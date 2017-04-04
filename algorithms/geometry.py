@@ -168,3 +168,55 @@ def line_intersect(l1: Line2, l2: Line2):
     x = -det2(c1, b1, c2, b2) / z
     y = -det2(a1, c1, a2, c2) / z
     return Vec2(x, y)
+
+
+def bb_test(a, b, c, d):
+    """1d Bounding box test"""
+    a, b = sorted((a, b))
+    c, d = sorted((c, d))
+    return max(a, c) <= min(b, d) + eps
+
+
+def in_range(l, r, x):
+    """Test if x in [l, r]"""
+    return min(l, r) <= x + eps and x <= max(l, r) + eps
+
+
+def segment_intersection(a: Vec2, b: Vec2, c: Vec2, d: Vec2):
+    """Find segments AB and CD intersection
+    
+    Returns
+    --------
+    False if do not intersects
+    Vec2 if intersection is the one point
+    (Vec2, Vec2) if intersection is segment
+    """
+    # check if bounding boxes are cross first
+    if not bb_test(a.x, b.x, c.x, d.x) or not bb_test(a.y, b.y, c.y, d.y):
+        return False
+    l1 = line(a, b)
+    l2 = line(c, d)
+
+    # check if one of segments is a point
+    point_test = all(map(lambda x: abs(x) < eps, l1)) or \
+                 all(map(lambda x: abs(x) < eps, l2))
+
+    if line_parallel(l1, l2):
+        if not line_same(l1, l2):
+            return False
+        a, b = sorted((a, b))
+        c, d = sorted((c, d))
+        l = max((a, c))
+        r = max((b, d))
+
+        return (l, r) if not point_test else l
+
+    else:
+        p = line_intersect(l1, l2)
+        # check if intersection point is inside segment
+        c_ = in_range(a.x, b.x, p.x) and \
+             in_range(a.y, b.y, p.y) and \
+             in_range(c.x, d.x, p.x) and \
+             in_range(c.y, d.y, p.y)
+
+        return p if c_ else False
