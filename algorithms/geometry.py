@@ -1,10 +1,11 @@
 from collections import namedtuple
 
-from math import sqrt, gcd
+from math import sqrt, gcd, hypot
 
 eps = 1e-14
 Vec2 = namedtuple('Vec2', ['x', 'y'])
 Vec3 = namedtuple('Vec3', ['x', 'y', 'z'])
+Line2 = namedtuple('Line2', ['a', 'b', 'c'])
 
 
 def dot(v, u):
@@ -72,7 +73,7 @@ def orientation(a, b, c):
            - a.z * b.y * c.x
 
 
-def line(p, q, normed='unit'):
+def line(p: Vec2, q: Vec2, normed='unit'):
     """Find line equation for ax + by + c = 0, through given points p and q"""
     # Solve [p - q, x] == 0
     a = q.y - p.y
@@ -94,4 +95,32 @@ def line(p, q, normed='unit'):
     if normed is not None and a < 0:
         a, b, c = -a, -b, -c
 
-    return a, b, c
+    return Line2(a, b, c)
+
+
+def distance_to_line(l: Line2, p: Vec2):
+    """d = distance from p to l
+    
+    let q - some point on l, then d = (p-q, n)/|n|
+    c = - qx - qy
+    (p-q, n) = a*(px - qx) + b*(py - qy) = a*px + b*py + c
+    """
+    a, b, c = l
+    x, y = p
+    z = hypot(a, b)
+    return abs(a * x + b * y + c) / z
+
+
+def line_projection(l: Line2, p: Vec2):
+    """Orthogonal projection of p on l
+    
+    p = Prp + Ortp
+    PrP = p - Ortp = p - d / |n| *  n
+    """
+    a, b, c = l
+    x, y = p
+    prx = (b * (b * x - a * y) - a * c) / (a * a + b * b)
+    pry = (a * (a * y - b * x) - b * c) / (a * a + b * b)
+    return Vec2(prx, pry)
+
+

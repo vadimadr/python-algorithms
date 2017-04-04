@@ -1,9 +1,9 @@
 from hypothesis import given
 from hypothesis.strategies import floats, tuples, integers
-from math import hypot, isclose
+from math import hypot, isclose, sqrt
 
 from algorithms.geometry import Vec2, orthogonal, Vec3, l2, orientation, \
-    vec2_prod, vec3_prod, line
+    vec2_prod, vec3_prod, line, Line2, distance_to_line, line_projection
 from tests.utils import float_eq
 
 
@@ -97,3 +97,17 @@ def test_line_int(t):
     assert isinstance(b, int)
     assert isinstance(c, int)
     assert a * px + b * py + c == 0
+
+
+def test_distance_to_line():
+    l = Line2(2.3, 1.4, 4)
+    p = Vec2(0.5, -2)
+    assert isclose(distance_to_line(l, p), 0.872768, abs_tol=1e-6)
+
+
+def test_line_projection():
+    l = Line2(-2, 6, -30)  # y = (1/3)*x + 5
+    p = Vec2(10, 5)
+    prp = line_projection(l, p)
+    assert abs(hypot(prp.x - p.x, prp.y - p.y) - sqrt(10)) < 1e-6
+    assert abs(prp.x - 9.0) < 1e-6 and abs(prp.y - 8.0) < 1e-6
