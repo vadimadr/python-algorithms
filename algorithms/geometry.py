@@ -8,6 +8,11 @@ Vec3 = namedtuple('Vec3', ['x', 'y', 'z'])
 Line2 = namedtuple('Line2', ['a', 'b', 'c'])
 
 
+def det2(a, b, c, d):
+    """Determinant of 2x2 matrix"""
+    return a * d - b * c
+
+
 def dot(v, u):
     """inner aka scalar aka dot product"""
     if isinstance(v, Vec2):
@@ -31,7 +36,7 @@ def vec2_prod(a, b):
 
     It is oriented area of the parallelogram btw a, b
     """
-    return a.x * b.y - a.y * b.x
+    return det2(a.x, a.y, b.x, b.y)
 
 
 def vec3_prod(a, b):
@@ -124,3 +129,42 @@ def line_projection(l: Line2, p: Vec2):
     return Vec2(prx, pry)
 
 
+def line_parallel(l1: Line2, l2: Line2):
+    """Test if lines l1 and l2 are parallel in R2
+    
+    Lines are parallel iff normal vectors are collinear
+    """
+    a1, b1, c1 = l1
+    a2, b2, c2 = l2
+    n1, n2 = Vec2(a1, b1), Vec2(a2, b2)  # normal vectors
+    return abs(vec2_prod(n1, n2)) < eps
+
+
+def line_same(l1: Line2, l2: Line2):
+    """Test if lines are the same
+    
+    Lines are the same if a,b,c are proportional with same ratio
+    """
+    a1, b1, c1 = l1
+    a2, b2, c2 = l2
+
+    # a, b, c are proportional iff all dets are equal to zero
+    c_ = abs(det2(a1, b1, a2, b2)) < eps and \
+         abs(det2(a1, c1, a2, c2)) < eps and \
+         abs(det2(b1, c1, b2, c2)) < eps
+
+    return c_
+
+
+def line_intersect(l1: Line2, l2: Line2):
+    """Test if lines are intersects and find the intersection point"""
+    a1, b1, c1 = l1
+    a2, b2, c2 = l2
+
+    # Solve the linear system using Cramer's rule
+    z = det2(a1, b1, a2, b2)
+    if abs(z) < eps:
+        return False
+    x = -det2(c1, b1, c2, b2) / z
+    y = -det2(a1, c1, a2, c2) / z
+    return Vec2(x, y)

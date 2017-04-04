@@ -3,7 +3,8 @@ from hypothesis.strategies import floats, tuples, integers
 from math import hypot, isclose, sqrt
 
 from algorithms.geometry import Vec2, orthogonal, Vec3, l2, orientation, \
-    vec2_prod, vec3_prod, line, Line2, distance_to_line, line_projection
+    vec2_prod, vec3_prod, line, Line2, distance_to_line, line_projection, \
+    line_parallel, line_same, line_intersect
 from tests.utils import float_eq
 
 
@@ -111,3 +112,31 @@ def test_line_projection():
     prp = line_projection(l, p)
     assert abs(hypot(prp.x - p.x, prp.y - p.y) - sqrt(10)) < 1e-6
     assert abs(prp.x - 9.0) < 1e-6 and abs(prp.y - 8.0) < 1e-6
+
+
+def test_line_parallel():
+    l1 = Line2(1, 1, 3)
+    l2 = Line2(2, 2, 8)
+    l3 = Line2(1, 2, 3)
+    assert line_parallel(l1, l2)
+    assert not line_parallel(l1, l3)
+
+
+def test_line_same():
+    l1 = Line2(1, 1, 3)
+    l2 = Line2(2, 2, 6)
+    l3 = Line2(2, 2, 8)
+    assert line_same(l1, l2)
+    assert not line_same(l1, l3)
+
+
+def test_line_intersect():
+    l1 = Line2(0, 1, 2)
+    l2 = Line2(1, 0, 3)
+    intersect = line_intersect(l1, l2)
+    assert abs(intersect.x - -3) < 1e-6 and abs(intersect.y - -2) < 1e-6
+
+    l1 = Line2(2, 2, 6)
+    l2 = Line2(2, 2, 8)
+
+    assert not line_intersect(l1, l2)
