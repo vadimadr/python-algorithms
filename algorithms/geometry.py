@@ -71,11 +71,11 @@ def orientation(a, b, c):
         return a.x * (b.y - c.y) + b.x * (c.y - a.y) + c.x * (a.y - b.y)
 
     return a.x * b.y * c.z \
-           + a.y * b.z * c.x \
-           + a.z * b.x * c.y \
-           - a.x * b.z * c.y \
-           - a.y * b.x * c.z \
-           - a.z * b.y * c.x
+        + a.y * b.z * c.x \
+        + a.z * b.x * c.y \
+        - a.x * b.z * c.y \
+        - a.y * b.x * c.z \
+        - a.z * b.y * c.x
 
 
 def line(p: Vec2, q: Vec2, normed='unit'):
@@ -105,7 +105,7 @@ def line(p: Vec2, q: Vec2, normed='unit'):
 
 def distance_to_line(l: Line2, p: Vec2):
     """d = distance from p to l
-    
+
     let q - some point on l, then d = (p-q, n)/|n|
     c = - qx - qy
     (p-q, n) = a*(px - qx) + b*(py - qy) = a*px + b*py + c
@@ -118,7 +118,7 @@ def distance_to_line(l: Line2, p: Vec2):
 
 def line_projection(l: Line2, p: Vec2):
     """Orthogonal projection of p on l
-    
+
     p = Prp + Ortp
     PrP = p - Ortp = p - d / |n| *  n
     """
@@ -131,7 +131,7 @@ def line_projection(l: Line2, p: Vec2):
 
 def line_parallel(l1: Line2, l2: Line2):
     """Test if lines l1 and l2 are parallel in R2
-    
+
     Lines are parallel iff normal vectors are collinear
     """
     a1, b1, c1 = l1
@@ -142,7 +142,7 @@ def line_parallel(l1: Line2, l2: Line2):
 
 def line_same(l1: Line2, l2: Line2):
     """Test if lines are the same
-    
+
     Lines are the same if a,b,c are proportional with same ratio
     """
     a1, b1, c1 = l1
@@ -150,8 +150,8 @@ def line_same(l1: Line2, l2: Line2):
 
     # a, b, c are proportional iff all dets are equal to zero
     c_ = abs(det2(a1, b1, a2, b2)) < eps and \
-         abs(det2(a1, c1, a2, c2)) < eps and \
-         abs(det2(b1, c1, b2, c2)) < eps
+        abs(det2(a1, c1, a2, c2)) < eps and \
+        abs(det2(b1, c1, b2, c2)) < eps
 
     return c_
 
@@ -184,7 +184,7 @@ def in_range(l, r, x):
 
 def segment_intersection(a: Vec2, b: Vec2, c: Vec2, d: Vec2):
     """Find segments AB and CD intersection
-    
+
     Returns
     --------
     False if do not intersects
@@ -199,7 +199,7 @@ def segment_intersection(a: Vec2, b: Vec2, c: Vec2, d: Vec2):
 
     # check if one of segments is a point
     point_test = all(map(lambda x: abs(x) < eps, l1)) or \
-                 all(map(lambda x: abs(x) < eps, l2))
+        all(map(lambda x: abs(x) < eps, l2))
 
     if line_parallel(l1, l2):
         if not line_same(l1, l2):
@@ -215,8 +215,26 @@ def segment_intersection(a: Vec2, b: Vec2, c: Vec2, d: Vec2):
         p = line_intersect(l1, l2)
         # check if intersection point is inside segment
         c_ = in_range(a.x, b.x, p.x) and \
-             in_range(a.y, b.y, p.y) and \
-             in_range(c.x, d.x, p.x) and \
-             in_range(c.y, d.y, p.y)
+            in_range(a.y, b.y, p.y) and \
+            in_range(c.x, d.x, p.x) and \
+            in_range(c.y, d.y, p.y)
 
         return p if c_ else False
+
+
+def segment_union_measure(xs):
+    """Returns length of union of segments"""
+    p = []
+    for a, b in xs:
+        # p[i][1] = point is right
+        p.append((a, False))
+        p.append((b, True))
+
+    p = sorted(p)
+    m = 0
+    c = 0
+    for i in range(len(p)):
+        if c and i:
+            m += p[i][0] - p[i - 1][0]
+        c += 1 if p[i][1] else -1
+    return m

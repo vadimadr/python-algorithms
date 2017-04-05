@@ -4,7 +4,8 @@ from math import hypot, isclose, sqrt
 
 from algorithms.geometry import Vec2, orthogonal, Vec3, l2, orientation, \
     vec2_prod, vec3_prod, line, Line2, distance_to_line, line_projection, \
-    line_parallel, line_same, line_intersect, segment_intersection
+    line_parallel, line_same, line_intersect, segment_intersection, \
+    segment_union_measure
 from tests.utils import float_eq
 
 
@@ -156,8 +157,13 @@ def test_segment_intersect():
     a, b, c, d = Vec2(1, 1), Vec2(4, 2), Vec2(1, 1), Vec2(6, 1)
     assert segment_intersection(a, b, c, d)
     # one point
-    a, b, c, d = Vec2(1, 1), Vec2(4, 2), Vec2(1, 1), Vec2(1,1)
+    a, b, c, d = Vec2(1, 1), Vec2(4, 2), Vec2(1, 1), Vec2(1, 1)
     assert segment_intersection(a, b, c, d)
     # two point
-    a, b, c, d = Vec2(1, 1), Vec2(1,1), Vec2(1, 1), Vec2(1,1)
+    a, b, c, d = Vec2(1, 1), Vec2(1, 1), Vec2(1, 1), Vec2(1, 1)
     assert segment_intersection(a, b, c, d)
+
+
+def test_segment_union_measure():
+    xs = [(1, 2), (1.5, 3)]
+    assert abs(segment_union_measure(xs) - 2) < 1e-6
