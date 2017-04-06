@@ -5,7 +5,7 @@ from math import hypot, isclose, sqrt
 from algorithms.geometry import Vec2, orthogonal, Vec3, l2, orientation, \
     vec2_prod, vec3_prod, line, Line2, distance_to_line, line_projection, \
     line_parallel, line_same, line_intersect, segment_intersection, \
-    segment_union_measure, segment_cover
+    segment_union_measure, segment_cover, polygon_area, points_inside
 from tests.utils import float_eq
 
 
@@ -174,3 +174,16 @@ def test_segment_cover():
     assert segment_cover(xs) == [4, 6]
     ys = [(0, 4.5)]
     assert segment_cover(xs, ys) == [6]
+
+
+def test_polygon_area():
+    xs = [Vec2(1, 2), Vec2(3, 5), Vec2(6, 5), Vec2(3, 7), Vec2(-2, 4)]
+    s = polygon_area(xs)
+    assert abs(s - 14.5) < 1e-6
+
+
+def test_points_inside():
+    xs = [Vec2(0,0), Vec2(3, 0), Vec2(3,3), Vec2(0, 3)]
+    assert points_inside(xs) == 4
+    xs = [Vec2(1, 2), Vec2(3, 5), Vec2(6, 5), Vec2(3, 7), Vec2(-2, 4)]
+    assert points_inside(xs) == 11

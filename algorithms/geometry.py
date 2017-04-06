@@ -71,11 +71,11 @@ def orientation(a, b, c):
         return a.x * (b.y - c.y) + b.x * (c.y - a.y) + c.x * (a.y - b.y)
 
     return a.x * b.y * c.z \
-           + a.y * b.z * c.x \
-           + a.z * b.x * c.y \
-           - a.x * b.z * c.y \
-           - a.y * b.x * c.z \
-           - a.z * b.y * c.x
+        + a.y * b.z * c.x \
+        + a.z * b.x * c.y \
+        - a.x * b.z * c.y \
+        - a.y * b.x * c.z \
+        - a.z * b.y * c.x
 
 
 def line(p: Vec2, q: Vec2, normed='unit'):
@@ -150,8 +150,8 @@ def line_same(l1: Line2, l2: Line2):
 
     # a, b, c are proportional iff all dets are equal to zero
     c_ = abs(det2(a1, b1, a2, b2)) < eps and \
-         abs(det2(a1, c1, a2, c2)) < eps and \
-         abs(det2(b1, c1, b2, c2)) < eps
+        abs(det2(a1, c1, a2, c2)) < eps and \
+        abs(det2(b1, c1, b2, c2)) < eps
 
     return c_
 
@@ -199,7 +199,7 @@ def segment_intersection(a: Vec2, b: Vec2, c: Vec2, d: Vec2):
 
     # check if one of segments is a point
     point_test = all(map(lambda x: abs(x) < eps, l1)) or \
-                 all(map(lambda x: abs(x) < eps, l2))
+        all(map(lambda x: abs(x) < eps, l2))
 
     if line_parallel(l1, l2):
         if not line_same(l1, l2):
@@ -215,9 +215,9 @@ def segment_intersection(a: Vec2, b: Vec2, c: Vec2, d: Vec2):
         p = line_intersect(l1, l2)
         # check if intersection point is inside segment
         c_ = in_range(a.x, b.x, p.x) and \
-             in_range(a.y, b.y, p.y) and \
-             in_range(c.x, d.x, p.x) and \
-             in_range(c.y, d.y, p.y)
+            in_range(a.y, b.y, p.y) and \
+            in_range(c.x, d.x, p.x) and \
+            in_range(c.y, d.y, p.y)
 
         return p if c_ else False
 
@@ -241,15 +241,15 @@ def segment_union_measure(xs):
 
 
 def segment_cover(xs, ys=None):
-    """Covers all segments with minimal set of points (each segment is 
+    """Covers all segments with minimal set of points (each segment is
     covered with at least one point)
-    
+
     Parameters
     -----------
     xs : List
         segments to be covered (objective)
     ys : List or None
-        open intervals that can not be covered (point can not be placed 
+        open intervals that can not be covered (point can not be placed
         inside it)
     """
     if not ys:
@@ -301,3 +301,39 @@ def segment_cover(xs, ys=None):
                 while d and xs[d[0]][0] <= last_free:
                     covered[d.popleft()] = True
     return coverage
+
+
+def polygon_area(pts):
+    """Returns area of polygon bounded by edges (pts[i], pts[i+1]) Polygon
+    may not be convex
+
+    Let O be some point. Then S = Sum of areas of all triangles OAB, where AB
+    - some edge of input polygon
+
+    Parameters
+    ------------------
+    pts: List[Vec2]
+        vertices of polygon in clockwise order
+    """
+    s = 0
+    for i in range(len(pts)):
+        s += vec2_prod(pts[i], pts[i - 1])
+        # or use areas of trapezoids with bases y1 and y2 instead
+        # s += (pts[i].x - pts[i-1].x)*(pts[i].y + pts[i-1].y)
+    return abs(s) / 2
+
+
+def points_inside(pts):
+    """Returns number of points with integer coordinates inside a polygon (
+    not in the border)
+
+    Use Pick's formula s = i + b/2 - 1
+    where i - points inside, b - points on the border
+    """
+    s = 0
+    b = 0
+    for i in range(len(pts)):
+        s += vec2_prod(pts[i], pts[i - 1])
+        # number of points on segment
+        b += gcd(pts[i].x - pts[i - 1].x, pts[i].y + pts[i - 1].y)
+    return (abs(s) - b + 2) // 2
