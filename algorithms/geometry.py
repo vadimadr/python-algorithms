@@ -1,4 +1,4 @@
-from collections import namedtuple
+from collections import namedtuple, deque
 
 from math import sqrt, gcd, hypot
 
@@ -71,11 +71,11 @@ def orientation(a, b, c):
         return a.x * (b.y - c.y) + b.x * (c.y - a.y) + c.x * (a.y - b.y)
 
     return a.x * b.y * c.z \
-        + a.y * b.z * c.x \
-        + a.z * b.x * c.y \
-        - a.x * b.z * c.y \
-        - a.y * b.x * c.z \
-        - a.z * b.y * c.x
+           + a.y * b.z * c.x \
+           + a.z * b.x * c.y \
+           - a.x * b.z * c.y \
+           - a.y * b.x * c.z \
+           - a.z * b.y * c.x
 
 
 def line(p: Vec2, q: Vec2, normed='unit'):
@@ -150,8 +150,8 @@ def line_same(l1: Line2, l2: Line2):
 
     # a, b, c are proportional iff all dets are equal to zero
     c_ = abs(det2(a1, b1, a2, b2)) < eps and \
-        abs(det2(a1, c1, a2, c2)) < eps and \
-        abs(det2(b1, c1, b2, c2)) < eps
+         abs(det2(a1, c1, a2, c2)) < eps and \
+         abs(det2(b1, c1, b2, c2)) < eps
 
     return c_
 
@@ -199,7 +199,7 @@ def segment_intersection(a: Vec2, b: Vec2, c: Vec2, d: Vec2):
 
     # check if one of segments is a point
     point_test = all(map(lambda x: abs(x) < eps, l1)) or \
-        all(map(lambda x: abs(x) < eps, l2))
+                 all(map(lambda x: abs(x) < eps, l2))
 
     if line_parallel(l1, l2):
         if not line_same(l1, l2):
@@ -215,9 +215,9 @@ def segment_intersection(a: Vec2, b: Vec2, c: Vec2, d: Vec2):
         p = line_intersect(l1, l2)
         # check if intersection point is inside segment
         c_ = in_range(a.x, b.x, p.x) and \
-            in_range(a.y, b.y, p.y) and \
-            in_range(c.x, d.x, p.x) and \
-            in_range(c.y, d.y, p.y)
+             in_range(a.y, b.y, p.y) and \
+             in_range(c.x, d.x, p.x) and \
+             in_range(c.y, d.y, p.y)
 
         return p if c_ else False
 
@@ -238,3 +238,66 @@ def segment_union_measure(xs):
             m += p[i][0] - p[i - 1][0]
         c += 1 if p[i][1] else -1
     return m
+
+
+def segment_cover(xs, ys=None):
+    """Covers all segments with minimal set of points (each segment is 
+    covered with at least one point)
+    
+    Parameters
+    -----------
+    xs : List
+        segments to be covered (objective)
+    ys : List or None
+        open intervals that can not be covered (point can not be placed 
+        inside it)
+    """
+    if not ys:
+        ys = []
+
+    # ps[i] = (x, objective?, right?, i_seg)
+    ps = []
+    for i, x in enumerate(xs):
+        ps.append((x[0], True, False, i))
+        ps.append((x[1], True, True, i))
+
+    for i, y in enumerate(ys):
+        ps.append((y[0], False, False, i))
+        ps.append((y[1], False, True, i))
+
+    ps = sorted(ps)
+    covered = [False] * len(xs)
+    d = deque()  # queue of not covered segments
+    coverage = []
+
+    last_free = None
+    inclusion_rate = 0  # nesting level of not objective segments
+    for p in ps:
+        x, objective, right, n = p
+
+        # not objective
+        if not objective and not right:
+            inclusion_rate += 1
+            if inclusion_rate == 1:
+                # or x - eps if ys are segments
+                last_free = x
+        elif not objective and right:
+            inclusion_rate -= 1
+
+        # objective
+        if objective and not right:
+            d.append(n)
+        elif objective and not covered[n]:
+            if inclusion_rate == 0:  # point can be placed here
+                # cover current and all opened segments
+                coverage.append(x)
+                # flush stack
+                for el in d:
+                    covered[el] = True
+                d.clear()
+            else:
+                if d and xs[d[0]][0] <= last_free:
+                    coverage.append(last_free)
+                while d and xs[d[0]][0] <= last_free:
+                    covered[d.popleft()] = True
+    return coverage

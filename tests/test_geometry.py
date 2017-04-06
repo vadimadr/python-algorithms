@@ -5,7 +5,7 @@ from math import hypot, isclose, sqrt
 from algorithms.geometry import Vec2, orthogonal, Vec3, l2, orientation, \
     vec2_prod, vec3_prod, line, Line2, distance_to_line, line_projection, \
     line_parallel, line_same, line_intersect, segment_intersection, \
-    segment_union_measure
+    segment_union_measure, segment_cover
 from tests.utils import float_eq
 
 
@@ -167,3 +167,10 @@ def test_segment_intersect():
 def test_segment_union_measure():
     xs = [(1, 2), (1.5, 3)]
     assert abs(segment_union_measure(xs) - 2) < 1e-6
+
+
+def test_segment_cover():
+    xs = [(3, 7), (1, 8), (5, 6), (2, 4)]
+    assert segment_cover(xs) == [4, 6]
+    ys = [(0, 4.5)]
+    assert segment_cover(xs, ys) == [6]
