@@ -5,7 +5,8 @@ from math import hypot, isclose, sqrt
 from algorithms.geometry import Vec2, orthogonal, Vec3, l2, orientation, \
     vec2_prod, vec3_prod, line, Line2, distance_to_line, line_projection, \
     line_parallel, line_same, line_intersect, segment_intersection, \
-    segment_union_measure, segment_cover, polygon_area, points_inside
+    segment_union_measure, segment_cover, polygon_area, points_inside, \
+    convex_polygon
 from tests.utils import float_eq
 
 
@@ -183,7 +184,15 @@ def test_polygon_area():
 
 
 def test_points_inside():
-    xs = [Vec2(0,0), Vec2(3, 0), Vec2(3,3), Vec2(0, 3)]
+    xs = [Vec2(0, 0), Vec2(3, 0), Vec2(3, 3), Vec2(0, 3)]
     assert points_inside(xs) == 4
     xs = [Vec2(1, 2), Vec2(3, 5), Vec2(6, 5), Vec2(3, 7), Vec2(-2, 4)]
     assert points_inside(xs) == 11
+
+
+def test_convex_polygon():
+    xs = [Vec2(1, 1), Vec2(2, 2), Vec2(3, 1), Vec2(3, 3), Vec2(1, 3)]
+    assert not convex_polygon(xs)
+    xs = [Vec2(2, 1), Vec2(3, 1), Vec2(4, 2), Vec2(3, 3), Vec2(2, 3),
+        Vec2(1, 2)]
+    assert convex_polygon(xs)

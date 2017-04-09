@@ -337,3 +337,16 @@ def points_inside(pts):
         # number of points on segment
         b += gcd(pts[i].x - pts[i - 1].x, pts[i].y + pts[i - 1].y)
     return (abs(s) - b + 2) // 2
+
+
+def convex_polygon(pts):
+    """Checks if polygon is convex"""
+    s = None
+    for i in range(len(pts)):
+        v1 = Vec2(pts[i - 2].x - pts[i - 1].x, pts[i - 2].y - pts[i - 1].y)
+        v2 = Vec2(pts[i].x - pts[i - 1].x, pts[i].y - pts[i - 1].y)
+        prod = vec2_prod(v1, v2)
+        s = prod if s is None else s
+        if prod * s < 0:
+            return False
+    return True
