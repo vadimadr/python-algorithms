@@ -211,3 +211,7 @@ def test_circle_line_intersect():
     assert n1 == 0
     assert n2 == 2
     assert n3 == 1
+
+    assert abs((p3[0].x - p.x)**2 + (p3[0].y - p.y)**2 - r*r) < 1e-6
+    assert abs((p2[0].x - p.x)**2 + (p2[0].y - p.y)**2 - r*r) < 1e-6
+    assert abs((p2[1].x - p.x)**2 + (p2[1].y - p.y)**2 - r*r) < 1e-6

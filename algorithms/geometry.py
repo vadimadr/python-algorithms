@@ -369,14 +369,12 @@ def circle_line_intersection(p, r, l):
         number of intersection points
     pts
         intersection points
-    
-    
     """
     # move circle and line to the origin
     l0 = Line2(l.a, l.b, l.c + l.a * p.x + l.b * p.y)
     a, b, c = l0
     # closest to the origin point on line
-    x0 = Vec2(-a * c / (a * a + b * b), -b * c / (a * a + b * b))
+    x0 = Vec2(-a * c / (a * a + b * b) + p.x, -b * c / (a * a + b * b) + p.y)
     # distance from line to the origin
     d = abs(c) / hypot(a, b)
     if d > r:
@@ -387,6 +385,6 @@ def circle_line_intersection(p, r, l):
         # distance from x0 to intersection points
         d0 = sqrt(r * r - d * d)
         # (-b, a) is collinear with l
-        dx = -b * d / hypot(a, b)
-        dy = a * d / hypot(a, b)
+        dx = -b * d0 / hypot(a, b)
+        dy = a * d0 / hypot(a, b)
         return 2, (Vec2(x0.x + dx, x0.y + dy), Vec2(x0.x - dx, x0.y - dy))
