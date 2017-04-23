@@ -6,7 +6,7 @@ from algorithms.geometry import Vec2, orthogonal, Vec3, l2, orientation, \
     vec2_prod, vec3_prod, line, Line2, distance_to_line, line_projection, \
     line_parallel, line_same, line_intersect, segment_intersection, \
     segment_union_measure, segment_cover, polygon_area, points_inside, \
-    convex_polygon
+    convex_polygon, circle_line_intersection
 from tests.utils import float_eq
 
 
@@ -196,3 +196,18 @@ def test_convex_polygon():
     xs = [Vec2(2, 1), Vec2(3, 1), Vec2(4, 2), Vec2(3, 3), Vec2(2, 3),
         Vec2(1, 2)]
     assert convex_polygon(xs)
+
+
+def test_circle_line_intersect():
+    p = Vec2(4, 5)
+    r = 3
+    l1 = line(Vec2(10, 6), Vec2(3, 12))
+    l2 = line(Vec2(6, 1), Vec2(0.5, 8))
+    l3 = line(Vec2(1, 0), Vec2(1, 2))
+
+    n1, p1 = circle_line_intersection(p, r, l1)
+    n2, p2 = circle_line_intersection(p, r, l2)
+    n3, p3 = circle_line_intersection(p, r, l3)
+    assert n1 == 0
+    assert n2 == 2
+    assert n3 == 1
