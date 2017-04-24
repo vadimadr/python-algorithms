@@ -6,7 +6,7 @@ from algorithms.geometry import Vec2, orthogonal, Vec3, l2, orientation, \
     vec2_prod, vec3_prod, line, Line2, distance_to_line, line_projection, \
     line_parallel, line_same, line_intersect, segment_intersection, \
     segment_union_measure, segment_cover, polygon_area, points_inside, \
-    convex_polygon, circle_line_intersection
+    convex_polygon, circle_line_intersection, circle_intersection
 from tests.utils import float_eq
 
 
@@ -198,6 +198,14 @@ def test_convex_polygon():
     assert convex_polygon(xs)
 
 
+def point_on_line(l, p0):
+    return abs(l.a * p0.x + l.b * p0.y + l.c) < 1e-6
+
+
+def point_on_circle(p, p0, r):
+    return abs((p0.x - p.x) ** 2 + (p0.y - p.y) ** 2 - r * r) < 1e-6
+
+
 def test_circle_line_intersect():
     p = Vec2(4, 5)
     r = 3
@@ -212,6 +220,25 @@ def test_circle_line_intersect():
     assert n2 == 2
     assert n3 == 1
 
-    assert abs((p3[0].x - p.x)**2 + (p3[0].y - p.y)**2 - r*r) < 1e-6
-    assert abs((p2[0].x - p.x)**2 + (p2[0].y - p.y)**2 - r*r) < 1e-6
-    assert abs((p2[1].x - p.x)**2 + (p2[1].y - p.y)**2 - r*r) < 1e-6
+    assert point_on_circle(p, p3[0], r)
+    assert point_on_circle(p, p2[0], r)
+    assert point_on_circle(p, p2[1], r)
+
+    assert point_on_line(l3, p3[0])
+    assert point_on_line(l2, p2[0])
+    assert point_on_line(l2, p2[1])
+
+
+def test_circle_circle_intersect():
+    p0 = Vec2(4, 5)
+    r0 = 3
+
+    p1, r1 = Vec2(8, 6), 4
+
+    n1, ip1 = circle_intersection(p0, r0, p1, r1)
+
+    assert n1 == 2
+    assert point_on_circle(p0, ip1[0], r0)
+    assert point_on_circle(p0, ip1[1], r0)
+    assert point_on_circle(p1, ip1[0], r1)
+    assert point_on_circle(p1, ip1[1], r1)

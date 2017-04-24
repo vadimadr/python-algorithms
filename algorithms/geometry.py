@@ -1,6 +1,6 @@
 from collections import namedtuple, deque
 
-from math import sqrt, gcd, hypot
+from math import sqrt, gcd, hypot, inf
 
 eps = 1e-14
 Vec2 = namedtuple('Vec2', ['x', 'y'])
@@ -388,3 +388,32 @@ def circle_line_intersection(p, r, l):
         dx = -b * d0 / hypot(a, b)
         dy = a * d0 / hypot(a, b)
         return 2, (Vec2(x0.x + dx, x0.y + dy), Vec2(x0.x - dx, x0.y - dy))
+
+
+def circle_intersection(p1, r1, p2, r2):
+    """Finds intersection of two circles with centers p1 and p2 and radius 
+    r1 and r2
+    
+    Method
+    -------
+    Assume first circle is at the origin, then solve the system of equations:
+    x^2 + y^2 = r1^2
+    (x - x0)^2 + (y - y0)^2 = r2^2
+    
+    and subtract the first equation from the second:
+    x (-2x0) + y (-2y0) + (x0^2 + y0^2 + r1^2 - r2^2) = 0
+    """
+    # centers are identical
+    if abs(p1.x - p2.x) < 1e-6 and abs(p1.y - p2.y) < 1e-6:
+        if abs(r1 - r2) < 1e-6:
+            return inf, ()  # circles are identical
+        else:
+            return 0, ()  # circles do not intersect
+
+    p2 = Vec2(p2.x - p1.x, p2.y - p1.y)
+    a = -2 * p2.x
+    b = -2 * p2.y
+    c = p2.x ** 2 + p2.y ** 2 + r1 ** 2 - r2 ** 2
+    n, ips = circle_line_intersection(Vec2(0, 0), r1, Line2(a, b, c))
+
+    return n, [Vec2(x + p1.x, y + p1.y) for x, y in ips]
