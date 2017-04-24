@@ -354,15 +354,15 @@ def convex_polygon(pts):
 
 def circle_line_intersection(p, r, l):
     """Finds intersection of a line with a circle
-    
+
     Parameters
     -----------
     p : Vec2
         Center of a circle
-    r 
+    r
         radius of a circle
     l : Line2
-    
+
     Returns
     ---------
     n : int
@@ -391,15 +391,15 @@ def circle_line_intersection(p, r, l):
 
 
 def circle_intersection(p1, r1, p2, r2):
-    """Finds intersection of two circles with centers p1 and p2 and radius 
+    """Finds intersection of two circles with centers p1 and p2 and radius
     r1 and r2
-    
+
     Method
     -------
     Assume first circle is at the origin, then solve the system of equations:
     x^2 + y^2 = r1^2
     (x - x0)^2 + (y - y0)^2 = r2^2
-    
+
     and subtract the first equation from the second:
     x (-2x0) + y (-2y0) + (x0^2 + y0^2 + r1^2 - r2^2) = 0
     """
