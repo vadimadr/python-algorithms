@@ -24,37 +24,41 @@ def insertion_sort(a, l, r):
             j -= 1
 
 
-def quick_sort(a, l, r):
-    """
-    http://ru.wikipedia.org/wiki/Быстрая_сортировка
-    http://en.wikipedia.org/wiki/Quicksort
+def quick_sort(a, lo, hi):
+    """quick sort with median of left, middle, right as pivot element"""
 
-    Реализация скопирована
-    ru.wikibooks.org/wiki/Реализации_алгоритмов/Сортировка/Быстрая (Java/C#)
-
-    в качестве опорного элемента выбирается середина
-    """
+    def pivot_median(seq, lo, hi):
+        m = lo + (hi - lo) // 2  # middle element
+        if seq[lo] < seq[m]:
+            if seq[m] < seq[hi - 1]:
+                return m
+            elif seq[hi - 1] < seq[lo]:
+                return lo
+        else:
+            if seq[hi - 1] < seq[m]:
+                return m
+            elif seq[lo] < seq[hi - 1]:
+                return lo
+        return hi - 1
 
     def partition(seq, start, end):
-        cursor = start  # позиция опорного элемента
-        swap(seq, (start + end) // 2,
-             end - 1)  # Переместить опорный элемент в конец
+        p = start  # index of first elem not less than pivot
+        pivot = pivot_median(seq, start, end)
+        swap(seq, pivot, end - 1)  # move pivot to the end
+
         for i in range(start, end):
             if seq[i] <= seq[end - 1]:
-                swap(seq, cursor, i)
-                cursor += 1
-        return cursor - 1  # на последней итерации будет свапнут seq[end],
-        # поэтому нужно уменьшить указатель на 1
+                swap(seq, p, i)
+                p += 1
+        return p
 
     def sort(seq, start, end):
         if start < end:
-            p = partition(seq, start,
-                          end)  # переместить элементы, меньшие или равные
-            # опорному в начало списка
-            sort(seq, start, p)
-            sort(seq, p + 1, end)
+            p = partition(seq, start, end)
+            sort(seq, start, p - 1)
+            sort(seq, p, end)
 
-    sort(a, l, r + 1)
+    sort(a, lo, hi + 1)
 
 
 def merge(seq, start, p, end):
