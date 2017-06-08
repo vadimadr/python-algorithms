@@ -5,8 +5,24 @@ from hypothesis import strategies as st
 from hypothesis import given
 
 from algorithms.sorting import *
+from algorithms.sorting._sorting import fast_sort_wrap
 from algorithms.sorting.merge import merge_lists, merge_n_lists, merge_sort
-from algorithms.sorting.utils import is_sorted, simple_sort
+
+
+def is_sorted(seq, start=0, end=None):
+    end = end or len(seq) - 1
+    for i in range(start + 1, end + 1):
+        if seq[i - 1] > seq[i]:
+            return False
+    return True
+
+
+def sorting_wrapper(fn):
+    def wrap(a, *args, **kwargs):
+        fn(a, 0, len(a), *args, **kwargs)
+        return list(a)
+
+    return wrap
 
 
 class BaseSortTest(TestCase):
@@ -15,7 +31,7 @@ class BaseSortTest(TestCase):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.sort = simple_sort(self.__class__.sort_method)
+        self.sort = sorting_wrapper(self.__class__.sort_method)
 
     def assertSorted(self, seq):
         self.assertTrue(is_sorted(seq))

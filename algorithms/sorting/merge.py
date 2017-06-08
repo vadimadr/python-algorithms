@@ -1,27 +1,24 @@
 from .simple import insertion_sort
 
 
-def merge2(a, lo, mid, hi):
-    n = (hi - lo + 1)
-    b = [0] * n
+def merge(a, lo, mid, hi, buf):
     q, p = lo, mid
-    for i in range(n):
+    for i in range(lo, hi):
         # either second array is exhausted
         # or next element in the left array is lt. in one in the right
-        if p > hi or q < mid and a[q] <= a[p]:
-            b[i] = a[q]
+        if p >= hi or q < mid and a[q] < a[p]:
+            buf[i] = a[q]
             q += 1
         else:
-            b[i] = a[p]
+            buf[i] = a[p]
             p += 1
 
-    a[lo:hi + 1] = b
 
-
-def merge_lists(xs, ys):
-    res = xs + ys
-    merge2(res, 0, len(xs), len(res) - 1)
-    return res
+def merge_inplace(a, lo, mid, hi):
+    # TODO: inplace merge w/o buffer. Currently works as merge function adapter
+    buf = [0] * (hi - lo)
+    merge(a, lo, mid, hi, buf)
+    a[lo:hi] = buf
 
 
 def merge_n(a, run):
@@ -62,17 +59,10 @@ def merge_n(a, run):
     b[:] = a[:]
 
 
-MIN_MERGE = 8
-
-
-def merge_sort(a, l, r):
-    runs = []
-
-    for k in range(l, r + 1, MIN_MERGE):
-        insertion_sort(a, k, min(r, k + MIN_MERGE))
-        runs.append(k)
-    runs.append(r + 1)
-    merge_n(a, runs)
+def merge_lists(xs, ys):
+    res = xs + ys
+    merge_inplace(res, 0, len(xs), len(res))
+    return res
 
 
 def merge_n_lists(lsts):
@@ -86,3 +76,25 @@ def merge_n_lists(lsts):
     runs.append(k - 1)
     merge_n(res, runs)
     return res
+
+
+MIN_MERGE = 8
+
+
+def merge_sort(arr, lo, hi):
+    buf = [0] * (hi - lo)
+    swapped = False
+    m = MIN_MERGE  # size of minimal sorted subarray
+    # optional step. Also works when m = 1
+    for k in range(lo, hi, MIN_MERGE):
+        insertion_sort(arr, k, min(hi, k + MIN_MERGE))
+
+    while m < len(arr):
+        for k in range(lo, hi - m, 2 * m):
+            merge(arr, lo, lo + m, min(lo + 2 * m, hi), buf)
+        swapped = not swapped
+        arr, buf = buf, arr
+        m *= 2
+
+    if swapped:
+        buf[lo:hi] = arr[:]

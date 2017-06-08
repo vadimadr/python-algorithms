@@ -1,23 +1,25 @@
-from algorithms.sorting.utils import imin, swap
+def swap(arr, i, j):
+    arr[i], arr[j] = arr[j], arr[i]
 
-from ._sorting import fast_sort_wrap
 
-
-def selection_sort(a, l, r):
-    for i in range(l, r + 1):
-        m = imin(a, i)
+def selection_sort(a, lo, hi):
+    for i in range(lo, hi):
+        m = i
+        for j in range(i, hi):
+            if a[j] < a[m]:
+                m = j
         swap(a, i, m)
 
 
-def bubble_sort(a, l, r):
-    for i in range(l, r + 1):
-        for j in range(1, r + 1):
+def bubble_sort(a, lo, hi):
+    for i in range(lo, hi):
+        for j in range(1, hi - i):
             if a[j] < a[j - 1]:
                 swap(a, j - 1, j)
 
 
-def insertion_sort(a, l, r):
-    for i in range(1, r + 1):
+def insertion_sort(a, lo, hi):
+    for i in range(1, hi):
         j = i
         while j > 0 and a[j] < a[j - 1]:
             swap(a, j, j - 1)
@@ -47,23 +49,16 @@ def quick_sort(a, lo, hi):
         swap(seq, pivot, end - 1)  # move pivot to the end
 
         for i in range(start, end):
-            if seq[i] <= seq[end - 1]:
+            if seq[i] < seq[end - 1]:
                 swap(seq, p, i)
                 p += 1
+        swap(seq, p, end - 1)
         return p
 
     def sort(seq, start, end):
         if start < end:
             p = partition(seq, start, end)
-            sort(seq, start, p - 1)
-            sort(seq, p, end)
+            sort(seq, start, p)
+            sort(seq, p + 1, end)
 
-    sort(a, lo, hi + 1)
-
-
-def merge(seq, start, p, end):
-    for i in range(start, end):
-        if seq[i] > seq[p]:
-            swap(seq, i, p)
-            p = min(p + 1, end - 1)
-    return seq
+    sort(a, lo, hi)
