@@ -1,7 +1,8 @@
 from unittest.case import TestCase
 
 from algorithms.searching import equal_range, lower_bound, upper_bound, \
-    longest_increasing_subsequence, maximum_sum_subarray, maximum_sum_subarray2
+    longest_increasing_subsequence, maximum_sum_subarray, \
+    maximum_sum_subarray2, longest_common_subsequence
 
 
 class TestBinSearch(TestCase):
@@ -114,3 +115,9 @@ def test_max_subarray2():
     l2, r2 = 0, 1
     s2 = sum(a2[l2:r2])
     assert maximum_sum_subarray2(a2) == (l2, r2, s2)
+
+
+def test_longest_common_subsequence():
+    a = "xmjyauz"
+    b = "mzjawxu"
+    assert longest_common_subsequence(a, b) == ['m', 'j', 'a', 'u']

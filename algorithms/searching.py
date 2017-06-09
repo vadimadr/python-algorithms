@@ -106,3 +106,39 @@ def maximum_sum_subarray2(a):
             l = cur_l
             r = i + 1
     return l, r, max_s
+
+
+def longest_common_subsequence(a, b):
+    """Returns longest common subsequence of a and b in O(n*m)
+    Z is a subsequence of a if Z == a with some elements removed.
+
+    properties of Z (optimal substructure):
+    1. a[-1] == b[-1] => Z[:-1] == LCS(a[:-1], b[:-1])
+    2. a[-1] != b[-1] and a[-1] != Z[-1] => Z == LCS(a[:-1], b)
+    2. a[-1] != b[-1] and b[-1] != Z[-1] => Z == LCS(a, b[:-1])
+    """
+    n, m = len(a), len(b)
+    lcs = [[0] * (m + 1) for _ in range(n + 1)]  # lcs of prefixes
+    p = [[(0, 0)] * (m + 1) for _ in range(n + 1)]
+
+    # lcs[n][m] == 0
+    for i in range(1, n + 1):
+        for j in range(1, m + 1):
+            if a[i - 1] == b[j - 1]:
+                lcs[i][j] = lcs[i - 1][j - 1] + 1
+                p[i][j] = (i - 1, j - 1)
+            elif lcs[i - 1][j] > lcs[i][j - 1]:
+                lcs[i][j] = lcs[i - 1][j]
+                p[i][j] = (i - 1, j)
+            else:
+                lcs[i][j] = lcs[i][j - 1]
+                p[i][j] = (i, j - 1)
+
+    z = []
+    i, j = n, m
+    while i > 0 and j > 0:
+        if p[i][j] == (i - 1, j - 1):
+            z.append(a[i - 1])
+        i, j = p[i][j]
+    z.reverse()
+    return z
