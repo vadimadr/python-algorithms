@@ -1,7 +1,7 @@
 from unittest.case import TestCase
 
 from algorithms.searching import equal_range, lower_bound, upper_bound, \
-    longest_increasing_subsequence
+    longest_increasing_subsequence, maximum_sum_subarray, maximum_sum_subarray2
 
 
 class TestBinSearch(TestCase):
@@ -82,3 +82,35 @@ def test_longest_increasing_subsequence():
 
     a1 = [3, 2, 6, 4, 5, 1]
     assert longest_increasing_subsequence(a1) == [2, 4, 5]
+
+
+def test_max_subarray():
+    a0 = [1, 2, 3, 4, 5]
+    l0, r0, s0 = 0, len(a0), sum(a0)
+    assert maximum_sum_subarray(a0) == (l0, r0, s0)
+
+    a1 = [-1, 2, 4, -3, 5, 2, -5, 2]
+    l1, r1 = 1, 6
+    s1 = sum(a1[l1:r1])
+    assert maximum_sum_subarray(a1) == (l1, r1, s1)
+
+    a2 = [-1, -2, -3]
+    l2, r2 = 0, 1
+    s2 = sum(a2[l2:r2])
+    assert maximum_sum_subarray(a2) == (l2, r2, s2)
+
+
+def test_max_subarray2():
+    a0 = [1, 2, 3, 4, 5]
+    l0, r0, s0 = 0, len(a0), sum(a0)
+    assert maximum_sum_subarray2(a0) == (l0, r0, s0)
+
+    a1 = [-1, 2, 4, -3, 5, 2, -5, 2]
+    l1, r1 = 1, 6
+    s1 = sum(a1[l1:r1])
+    assert maximum_sum_subarray2(a1) == (l1, r1, s1)
+
+    a2 = [-1, -2, -3]
+    l2, r2 = 0, 1
+    s2 = sum(a2[l2:r2])
+    assert maximum_sum_subarray2(a2) == (l2, r2, s2)
