@@ -103,6 +103,9 @@ class BaseSelectionSortTest(BaseSortTest):
     sort_method = selection_sort
 
 
+class BaseHeapSortTest(BaseSortTest):
+    sort_method = heap_sort
+
 class TestMerge(TestCase):
     def testEqual(self):
         xs = [1] * 10

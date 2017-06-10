@@ -62,3 +62,26 @@ def quick_sort(a, lo, hi):
             sort(seq, p + 1, end)
 
     sort(a, lo, hi)
+
+
+def heap_sort(a, lo, hi):
+    def siftdown(i_, hi_):
+        while i_ * 2 + 1 < hi_:
+            if i_ * 2 + 2 < hi_ and a[i_ * 2 + 2] > a[i_ * 2 + 1]:
+                j = i_ * 2 + 2
+            else:
+                j = i_ * 2 + 1
+            if a[i_] < a[j]:
+                swap(a, i_, j)
+                i_ = j
+            else:
+                break
+
+    # heapify
+    for i in reversed(range(lo + (hi - lo) // 2 + 1)):
+        siftdown(i, hi)
+
+    # popmax
+    for i in range(lo, hi):
+        swap(a, hi - i - lo - 1, lo)
+        siftdown(lo, hi - i - lo - 1)
