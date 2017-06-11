@@ -172,7 +172,7 @@ def restore_path(p: list, v):
     return list(reversed(path))
 
 
-def dijkstra_search(g: BaseGraph, u):
+def dijkstra_search(g: BaseGraph, from_):
     """
     Find all shortest paths from node u to all others in O(N^2 + E)
 
@@ -191,9 +191,9 @@ def dijkstra_search(g: BaseGraph, u):
 
     used = [False] * n
     pq = BinaryHeap()  # use priority queue for finding minimum.
-    pq.push((0, u))
+    pq.push((0, from_))
 
-    d[u] = 0
+    d[from_] = 0
     while pq.data:
         # unused node with minimal distance (d[v])
         dist, v = pq.pop()
@@ -214,5 +214,34 @@ def dijkstra_search(g: BaseGraph, u):
                 p[u_] = v
                 d[u_] = relaxed
                 pq.push((relaxed, u_))
+
+    return d, p
+
+
+def bellman_ford_search(g: BaseGraph, from_):
+    """Shortest path problem using Bellman-Ford algorithm. Slower than
+    Dijkstra's but allows edges with negative weights, ut without negative
+    cycles. Complexity: O(n*m)
+    """
+    n = g.order()  # |V|
+    d = [inf] * n
+    p = [-1] * n
+
+    # graph must be represented as edges list.
+    edges = list(g.edges())
+
+    d[from_] = 0
+    for i in range(n - 1):
+        relaxed = False  # early stopping
+        for u_, v_, dist in edges:
+            # first check is needed when negative edges to prevent inf - k
+            if d[u_] < inf and d[v_] > d[u_] + dist:
+                d[v_] = d[u_] + dist
+                p[v_] = u_
+                relaxed = True
+        if not relaxed:
+            break
+
+    # additionally detect negative cycles here with additional iteration.
 
     return d, p

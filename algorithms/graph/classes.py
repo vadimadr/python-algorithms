@@ -190,6 +190,14 @@ class BaseGraph(ABC, metaclass=ABCMeta):
             yield from self.successors(v)
             yield from self.predecessors(v)
 
+    def edges(self):
+        for u in range(self._n_nodes):
+            for edge in self.successors(u):
+                if self.weighted:
+                    yield u, edge[0], edge[1]
+                else:
+                    yield u, edge
+
     def in_degree(self, v):
         # deg-(v)
         # the number of head ends adjacent to a vertex

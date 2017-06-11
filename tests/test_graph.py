@@ -11,7 +11,8 @@ from algorithms.graph import (AdjMxGraph, AdjSetGraph, EdgeListGraph,
 from algorithms.graph.problems import find_cycle, topological_sort, \
     euler_graph_test, euler_path
 from algorithms.graph.searching import (bfs, bfs_iter, dfs_iter,
-                                        dijkstra_search, restore_path)
+                                        dijkstra_search, restore_path,
+                                        bellman_ford_search)
 from algorithms.graph.utils import normalize_edge_list, \
     normalize_adjacency_dict
 
@@ -353,6 +354,51 @@ class TestSearch:
         D = []
         for i in g:
             d, p = dijkstra_search(g, i)
+            P.append(p)
+            D.append(d)
+
+        D_, P_ = scipy_graph.dijkstra(undirected_G, return_predecessors=True)
+        P_[P_ == -9999] = -1
+        assert (np.array(P, dtype=int) - P_ == 0).all()
+        assert (np.array(P, dtype=float) - P_ < 1e-6).all()
+
+    def test_bellmanford_directed(self):
+        directed_G = np.array([[0, 3, 3, 0, 0],
+            [0, 0, 0, 2, 4],
+            [0, 0, 0, 0, 0],
+            [1, 0, 0, 0, 0],
+            [2, 0, 0, 2, 0]], dtype=float)
+
+        g = self.graph.from_adjacency_matrix(directed_G, directed=True,
+            weighted=True)
+
+        P = []
+        D = []
+        for i in g:
+            d, p = bellman_ford_search(g, i)
+            P.append(p)
+            D.append(d)
+
+        D_, P_ = scipy_graph.dijkstra(directed_G, directed=True,
+            return_predecessors=True)
+        P_[P_ == -9999] = -1
+        assert (np.array(P, dtype=int) - P_ == 0).all()
+        assert (np.array(P, dtype=float) - P_ < 1e-6).all()
+
+    def test_bellmanford_undirected(self):
+        undirected_G = np.array([[0, 3, 3, 1, 2],
+            [3, 0, 0, 2, 4],
+            [3, 0, 0, 0, 0],
+            [1, 2, 0, 0, 2],
+            [2, 4, 0, 2, 0]], dtype=float)
+
+        g = self.graph.from_adjacency_matrix(undirected_G, directed=False,
+            weighted=True)
+
+        P = []
+        D = []
+        for i in g:
+            d, p = bellman_ford_search(g, i)
             P.append(p)
             D.append(d)
 
