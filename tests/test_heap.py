@@ -57,3 +57,19 @@ def test_heap_replace(data, i, newval):
     i %= len(data)
     heap.replace(i, newval)
     assert is_heap(heap)
+
+
+@given(lists(integers(), 1), lists(integers(), 1))
+def test_merge_heaps(data1, data2):
+    heap1 = BinaryHeap(data1)
+    heap2 = BinaryHeap(data2)
+    heap1.merge(heap2)
+    assert is_heap(heap1)
+
+
+@given(lists(integers(), 1), integers(0))
+def test_kth_element(data, i):
+    heap = BinaryHeap(data)
+    i %= len(data)
+    kth = sorted(data)[i]
+    assert heap.kth_element(i) == kth

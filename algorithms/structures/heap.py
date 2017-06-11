@@ -100,9 +100,11 @@ class BinaryHeap:
     def pop(self):
         """Pops minimum (maximum) element and restores heap property"""
         item = self.data[0]
-        self.data[0] = self.data[self.n - 1]
+        self.data[0] = self.data[-1]
+        self.data.pop()
         self.n -= 1
-        self.siftdown(0)
+        if self.n:
+            self.siftdown(0)
         return item
 
     def replace(self, i, newval):
@@ -114,3 +116,25 @@ class BinaryHeap:
             self.siftup(i)
         else:
             self.siftdown(i)
+
+    def merge(self, second):
+        """Merge heaps in O(N + M)"""
+        self.data += second.data
+        self.n += second.n
+        self.heapify()
+
+    def kth_element(self, k):
+        """Returns kth smallest element in O(k*log k). When k log K >= n it
+        is better to use quick select algorithm"""
+        n = self.n
+        temp = BinaryHeap(maxheap=self.maxheap)
+        temp.push((self.data[0], 0))
+        for i in range(k):
+            val, idx = temp.data[0]
+            left_child = 2 * idx + 1
+            if left_child < n:
+                temp.push((self.data[left_child], left_child))
+            if left_child + 1 < n:
+                temp.push((self.data[left_child + 1], left_child + 1))
+            temp.pop()
+        return temp.data[0][0]
