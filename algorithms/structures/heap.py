@@ -54,8 +54,8 @@ class BinaryHeap:
         while child < n:
             # select smallest child
             maxheap = self.maxheap
-            if child + 1 < n and (not maxheap and a[child + 1] < a[child]
-            or maxheap and a[child] < a[child + 1]):
+            if child + 1 < n and (not maxheap and a[child + 1] < a[child] or
+                    maxheap and a[child] < a[child + 1]):
                 child += 1
             a[i] = a[child]
             i = child
