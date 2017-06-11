@@ -1,5 +1,6 @@
 from collections import deque
 
+from algorithms.structures.heap import BinaryHeap
 from . import BaseGraph
 
 inf = float('inf')
@@ -188,26 +189,30 @@ def dijkstra_search(g: BaseGraph, u):
     d = [inf] * n
     p = [-1] * n
 
-    unused = set(range(n))
+    used = [False] * n
+    pq = BinaryHeap()  # use priority queue for finding minimum.
+    pq.push((0, u))
 
     d[u] = 0
-    while unused:
+    while pq.data:
         # unused node with minimal distance (d[v])
-        v = None
-        for v_ in unused:
-            if v is None or d[v_] < d[v]:
-                v = v_
+        dist, v = pq.pop()
+        # heaps do not support deleting random element. So check if dist is
+        # valid
+        if used[v] or dist != d[v]:
+            continue
 
         # unreachable from u, end of connected component
         if d[v] == inf:
             break
-        unused.remove(v)
 
+        used[v] = True
         # relaxation
         for u_, dist in g.successors(v):
             relaxed = d[v] + dist
             if relaxed < d[u_]:
                 p[u_] = v
                 d[u_] = relaxed
+                pq.push((relaxed, u_))
 
     return d, p
