@@ -1,5 +1,7 @@
 from collections import deque
 
+import numpy as np
+
 from algorithms.structures.heap import BinaryHeap
 from . import BaseGraph
 
@@ -243,5 +245,31 @@ def bellman_ford_search(g: BaseGraph, from_):
             break
 
     # additionally detect negative cycles here with additional iteration.
+
+    return d, p
+
+
+def floyd_warshall_search(g: BaseGraph):
+    """Shortest path between all vertices using Floyd-Warshall algorithm.
+    Complexity: O(n^3)"""
+    n = g.order()
+    d = np.full((n, n), inf)  # distance matrix
+    p = np.full((n, n), -1)
+
+    #  distance initialization
+    for u in range(n):
+        d[u, u] = 0
+        for v, dist_ in g.successors(u):
+            d[u, v] = dist_
+            p[u, v] = u
+
+    # n phases.
+    for i in range(n):
+        for u in range(n):
+            for v in range(n):
+                # try to reduce distance using vertex i.
+                if d[u, v] > d[u, i] + d[i, v]:
+                    d[u, v] = d[u, i] + d[i, v]
+                    p[u, v] = p[i, v]
 
     return d, p
