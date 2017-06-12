@@ -12,23 +12,24 @@ from algorithms.graph.problems import find_cycle, topological_sort, \
     euler_graph_test, euler_path
 from algorithms.graph.searching import (bfs, bfs_iter, dfs_iter,
                                         dijkstra_search, restore_path,
-                                        bellman_ford_search)
+                                        bellman_ford_search,
+                                        floyd_warshall_search)
 from algorithms.graph.utils import normalize_edge_list, \
     normalize_adjacency_dict
 
 k5 = [(0, 1), (0, 2), (0, 3), (0, 4), (1, 2), (1, 3), (1, 4), (2, 3), (2, 4),
-      (3, 4)]
+    (3, 4)]
 k7 = [(0, 1), (0, 2), (0, 3), (0, 4), (0, 5), (0, 6), (1, 2), (1, 3), (1, 4),
-      (1, 5), (1, 6), (2, 3), (2, 4), (2, 5), (2, 6), (3, 4), (3, 5), (3, 6),
-      (4, 5), (4, 6), (5, 6)]
+    (1, 5), (1, 6), (2, 3), (2, 4), (2, 5), (2, 6), (3, 4), (3, 5), (3, 6),
+    (4, 5), (4, 6), (5, 6)]
 
 # complete bipariate graph
 k3_3 = [(0, 3), (0, 4), (0, 5), (1, 3), (1, 4), (1, 5), (2, 3), (2, 4), (2, 5)]
 
 k4_4m = [[0, 0, 0, 0, 1, 1, 1, 1], [0, 0, 0, 0, 1, 1, 1, 1],
-         [0, 0, 0, 0, 1, 1, 1, 1], [0, 0, 0, 0, 1, 1, 1, 1],
-         [1, 1, 1, 1, 0, 0, 0, 0], [1, 1, 1, 1, 0, 0, 0, 0],
-         [1, 1, 1, 1, 0, 0, 0, 0], [1, 1, 1, 1, 0, 0, 0, 0]]
+    [0, 0, 0, 0, 1, 1, 1, 1], [0, 0, 0, 0, 1, 1, 1, 1],
+    [1, 1, 1, 1, 0, 0, 0, 0], [1, 1, 1, 1, 0, 0, 0, 0],
+    [1, 1, 1, 1, 0, 0, 0, 0], [1, 1, 1, 1, 0, 0, 0, 0]]
 
 # star graph
 s6 = [(0, 1), (0, 2), (0, 3), (0, 4), (0, 5)]
@@ -41,8 +42,28 @@ def labeled_path(path, labels):
     return [labels[i] for i in path]
 
 
+def check_path(g, d, p, d_true):
+    n = g.order()
+    d_check = np.full((n, n), np.inf)
+    np.fill_diagonal(d_check, 0)
+
+    for i in range(n):
+        for j in range(n):
+            dist = 0
+            u, v = p[i][j], j
+            if u == - 1 and i != j:
+                dist = np.inf
+            while u != -1:
+                dist += g.distance(u, v)
+                u, v = p[i][u], u
+            d_check[i, j] = dist
+
+    assert np.allclose(d, d_check)
+    assert np.allclose(d, d_true)
+
+
 @pytest.fixture(scope="class", params=[AdjMxGraph, AdjSetGraph, EdgeListGraph],
-                ids=["Matrix", "Set", "Edge List"])
+    ids=["Matrix", "Set", "Edge List"])
 def graph_cls(request):
     request.cls.graph = request.param
 
@@ -203,7 +224,7 @@ class TestGraphUtils:
         g = self.graph.from_edge_list(k3_3)
         m = np.array(
             [[0, 0, 0, 1, 1, 1], [0, 0, 0, 1, 1, 1], [0, 0, 0, 1, 1, 1],
-             [1, 1, 1, 0, 0, 0], [1, 1, 1, 0, 0, 0], [1, 1, 1, 0, 0, 0]],
+                [1, 1, 1, 0, 0, 0], [1, 1, 1, 0, 0, 0], [1, 1, 1, 0, 0, 0]],
             dtype=float)
 
         assert (m == to_adjacency_matrix(g)).all()
@@ -219,7 +240,7 @@ class TestGraphUtils:
         g = self.graph.from_edge_list(k3_3)
 
         l = [(0, 3), (0, 4), (0, 5), (1, 3), (1, 4), (1, 5), (2, 3), (2, 4),
-             (2, 5)]
+            (2, 5)]
 
         assert sorted(l) == sorted(to_edge_list(g))
 
@@ -246,9 +267,24 @@ class TestGraphUtils:
         g2 = to_undirected(g)
 
         l = [(0, 3), (0, 4), (0, 5), (1, 3), (1, 4), (1, 5), (2, 3), (2, 4),
-             (2, 5)]
+            (2, 5)]
 
         assert l == to_edge_list(g2)
+
+
+shortest_path_directed1 = [
+    [0, 3, 3, 0, 0],
+    [0, 0, 0, 2, 4],
+    [0, 0, 0, 0, 0],
+    [1, 0, 0, 0, 0],
+    [2, 0, 0, 2, 0]]
+
+shortest_path_undirected1 = [
+    [0, 3, 3, 1, 2],
+    [3, 0, 0, 2, 4],
+    [3, 0, 0, 0, 0],
+    [1, 2, 0, 0, 2],
+    [2, 4, 0, 2, 0]]
 
 
 @pytest.mark.usefixtures("graph_cls")
@@ -258,10 +294,10 @@ class TestSearch:
         path2 = [0, 1, 4, 3, 2]
 
         graph = np.array([[0, 1, 2, 0, 0],
-                          [1, 0, 0, 0, 3],
-                          [2, 0, 0, 7, 0],
-                          [0, 0, 7, 0, 1],
-                          [0, 3, 0, 1, 0]])
+            [1, 0, 0, 0, 3],
+            [2, 0, 0, 7, 0],
+            [0, 0, 7, 0, 1],
+            [0, 3, 0, 1, 0]])
 
         for directed, preorder in product([True, False], [True, False]):
             g1 = self.graph.from_edge_list(c5, directed=directed)
@@ -277,10 +313,10 @@ class TestSearch:
 
     def test_bfs_iter(self):
         graph = np.array([[0, 1, 2, 0, 0],
-                          [1, 0, 0, 0, 3],
-                          [2, 0, 0, 7, 0],
-                          [0, 0, 7, 0, 1],
-                          [0, 3, 0, 1, 0]])
+            [1, 0, 0, 0, 3],
+            [2, 0, 0, 7, 0],
+            [0, 0, 7, 0, 1],
+            [0, 3, 0, 1, 0]])
 
         path1 = [0, 1, 4, 2, 3]  # c5, undir
         path2 = [0, 1, 2, 3, 4]  # c5, dir
@@ -312,100 +348,58 @@ class TestSearch:
                 assert p == [-1, 0, 1, 4, 0]
                 assert d == [0, 1, 2, 2, 1]
 
+    @pytest.mark.parametrize('G', [shortest_path_directed1])
+    @pytest.mark.parametrize('method,one', [
+        (dijkstra_search, True),
+        (bellman_ford_search, True),
+        (floyd_warshall_search, False),
+    ], ids=['Dijkstra', 'Bellman-Ford', 'Floyd-Warshall'])
+    def test_shortest_path_directed(self, method, one, G):
+        directed_G = np.array(G, dtype=float)
+
+        g = self.graph.from_adjacency_matrix(directed_G, directed=True,
+            weighted=True)
+        if one:
+            P = []
+            D = []
+            for i in g:
+                d, p = method(g, i)
+                P.append(p)
+                D.append(d)
+        else:
+            D, P = method(g)
+
+        D_ = scipy_graph.shortest_path(directed_G, directed=g.directed)
+        check_path(g, D, P, D_)
+
+    @pytest.mark.parametrize('G', [shortest_path_undirected1])
+    @pytest.mark.parametrize('method,one', [
+        (dijkstra_search, True),
+        (bellman_ford_search, True),
+        (floyd_warshall_search, False),
+    ], ids=['Dijkstra', 'Bellman-Ford', 'Floyd-Warshall'])
+    def test_shortest_path_undirected(self, method, one, G):
+        directed_G = np.array(G, dtype=float)
+
+        g = self.graph.from_adjacency_matrix(directed_G, directed=False,
+            weighted=True)
+        if one:
+            P = []
+            D = []
+            for i in g:
+                d, p = method(g, i)
+                P.append(p)
+                D.append(d)
+        else:
+            D, P = method(g)
+
+        D_ = scipy_graph.shortest_path(directed_G, directed=g.directed)
+        check_path(g, D, P, D_)
+
     def test_restore_path(self):
         assert restore_path([-1, 0, 1, 2, 3], 4) == [0, 1, 2, 3, 4]
         assert restore_path([-1, 0, 1, 4, 0], 3) == [0, 4, 3]
         assert restore_path([-1, 0, 1, 2, 3], 0) == [0]
-
-    def test_dijkstra_directed(self):
-        directed_G = np.array([[0, 3, 3, 0, 0],
-                               [0, 0, 0, 2, 4],
-                               [0, 0, 0, 0, 0],
-                               [1, 0, 0, 0, 0],
-                               [2, 0, 0, 2, 0]], dtype=float)
-
-        g = self.graph.from_adjacency_matrix(directed_G, directed=True,
-                                             weighted=True)
-
-        P = []
-        D = []
-        for i in g:
-            d, p = dijkstra_search(g, i)
-            P.append(p)
-            D.append(d)
-
-        D_, P_ = scipy_graph.dijkstra(directed_G, directed=True,
-                                      return_predecessors=True)
-        P_[P_ == -9999] = -1
-        assert (np.array(P, dtype=int) - P_ == 0).all()
-        assert (np.array(P, dtype=float) - P_ < 1e-6).all()
-
-    def test_dijkstra_undirected(self):
-        undirected_G = np.array([[0, 3, 3, 1, 2],
-                                 [3, 0, 0, 2, 4],
-                                 [3, 0, 0, 0, 0],
-                                 [1, 2, 0, 0, 2],
-                                 [2, 4, 0, 2, 0]], dtype=float)
-
-        g = self.graph.from_adjacency_matrix(undirected_G, directed=False,
-                                             weighted=True)
-
-        P = []
-        D = []
-        for i in g:
-            d, p = dijkstra_search(g, i)
-            P.append(p)
-            D.append(d)
-
-        D_, P_ = scipy_graph.dijkstra(undirected_G, return_predecessors=True)
-        P_[P_ == -9999] = -1
-        assert (np.array(P, dtype=int) - P_ == 0).all()
-        assert (np.array(P, dtype=float) - P_ < 1e-6).all()
-
-    def test_bellmanford_directed(self):
-        directed_G = np.array([[0, 3, 3, 0, 0],
-            [0, 0, 0, 2, 4],
-            [0, 0, 0, 0, 0],
-            [1, 0, 0, 0, 0],
-            [2, 0, 0, 2, 0]], dtype=float)
-
-        g = self.graph.from_adjacency_matrix(directed_G, directed=True,
-            weighted=True)
-
-        P = []
-        D = []
-        for i in g:
-            d, p = bellman_ford_search(g, i)
-            P.append(p)
-            D.append(d)
-
-        D_, P_ = scipy_graph.dijkstra(directed_G, directed=True,
-            return_predecessors=True)
-        P_[P_ == -9999] = -1
-        assert (np.array(P, dtype=int) - P_ == 0).all()
-        assert (np.array(P, dtype=float) - P_ < 1e-6).all()
-
-    def test_bellmanford_undirected(self):
-        undirected_G = np.array([[0, 3, 3, 1, 2],
-            [3, 0, 0, 2, 4],
-            [3, 0, 0, 0, 0],
-            [1, 2, 0, 0, 2],
-            [2, 4, 0, 2, 0]], dtype=float)
-
-        g = self.graph.from_adjacency_matrix(undirected_G, directed=False,
-            weighted=True)
-
-        P = []
-        D = []
-        for i in g:
-            d, p = bellman_ford_search(g, i)
-            P.append(p)
-            D.append(d)
-
-        D_, P_ = scipy_graph.dijkstra(undirected_G, return_predecessors=True)
-        P_[P_ == -9999] = -1
-        assert (np.array(P, dtype=int) - P_ == 0).all()
-        assert (np.array(P, dtype=float) - P_ < 1e-6).all()
 
     def test_find_cycle(self):
         test_edges = [(0, 1), (0, 2), (1, 2), (1, 3), (2, 3)]
@@ -425,7 +419,7 @@ class TestSearch:
 
     def test_euler_graph(self):
         g1_ = [(0, 1), (0, 2), (1, 3), (1, 5), (2, 1), (2, 3), (3, 0), (3, 4),
-               (4, 0), (4, 2), (5, 4)]
+            (4, 0), (4, 2), (5, 4)]
         g2_ = [(0, 1), (1, 2), (2, 0), (3, 4), (4, 5), (5, 3)]  # two triangles
         g3_ = [(0, 3), (0, 4), (3, 1), (3, 2), (1, 2), (2, 0), (4, 1)]
 
