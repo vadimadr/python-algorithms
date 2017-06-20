@@ -6,11 +6,11 @@ from unittest import TestCase
 import pytest
 from hypothesis import given
 from hypothesis.strategies import integers
+from tests.utils import float_eq
 
 from algorithms.numeric import (binomial, euler_phi, even, factorize,
                                 fibonacci, gcd, is_prime, newton_raphson_root,
                                 odd, sieve, ternary_search)
-from tests.utils import float_eq
 
 _dir = os.path.dirname(__file__)
 

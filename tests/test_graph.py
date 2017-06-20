@@ -8,14 +8,15 @@ from scipy.sparse import csgraph as scipy_graph
 from algorithms.graph import (AdjMxGraph, AdjSetGraph, EdgeListGraph,
                               is_complete_graph, subgraph, to_adjacency_list,
                               to_adjacency_matrix, to_edge_list, to_undirected)
-from algorithms.graph.problems import find_cycle, topological_sort, \
-    euler_graph_test, euler_path, is_connected
-from algorithms.graph.searching import (bfs, bfs_iter, dfs_iter,
-                                        dijkstra_search, restore_path,
-                                        bellman_ford_search,
-                                        floyd_warshall_search, kruskal_mst)
-from algorithms.graph.utils import normalize_edge_list, \
-    normalize_adjacency_dict
+from algorithms.graph.problems import (euler_graph_test, euler_path,
+                                       find_cycle, is_connected,
+                                       topological_sort)
+from algorithms.graph.searching import (bellman_ford_search, bfs, bfs_iter,
+                                        dfs_iter, dijkstra_search,
+                                        floyd_warshall_search, kruskal_mst,
+                                        restore_path)
+from algorithms.graph.utils import (normalize_adjacency_dict,
+                                    normalize_edge_list)
 
 k5 = [(0, 1), (0, 2), (0, 3), (0, 4), (1, 2), (1, 3), (1, 4), (2, 3), (2, 4),
       (3, 4)]

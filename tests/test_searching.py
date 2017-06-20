@@ -1,8 +1,9 @@
 from unittest.case import TestCase
 
-from algorithms.searching import equal_range, lower_bound, upper_bound, \
-    longest_increasing_subsequence, maximum_sum_subarray, \
-    maximum_sum_subarray2, longest_common_subsequence
+from algorithms.searching import (equal_range, longest_common_subsequence,
+                                  longest_increasing_subsequence, lower_bound,
+                                  maximum_sum_subarray, maximum_sum_subarray2,
+                                  upper_bound)
 
 
 class TestBinSearch(TestCase):

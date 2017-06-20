@@ -3,11 +3,11 @@ import string
 import pytest
 from hypothesis import given
 from hypothesis.strategies import text
+from tests.utils import substring_pair
 
 from algorithms.strings import (boyer_moore_substr, bruteforce_substr,
                                 kmp_substr, prefix, prefix_hash,
                                 robin_karp_substr)
-from tests.utils import substring_pair
 
 substr_cases = [('aaa', 'a', 0),
                 ('aaa', '', 0),

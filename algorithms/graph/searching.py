@@ -5,6 +5,7 @@ import numpy as np
 
 from algorithms.structures.disjoint_set import DisjointSet
 from algorithms.structures.heap import BinaryHeap
+
 from . import BaseGraph
 
 inf = float('inf')

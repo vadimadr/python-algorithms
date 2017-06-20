@@ -5,7 +5,7 @@ from time import perf_counter
 
 import numpy as np
 from matplotlib import pyplot
-from scipy.optimize import curve_fit, root, brentq
+from scipy.optimize import curve_fit, root
 
 
 class Benchmark(ABC):

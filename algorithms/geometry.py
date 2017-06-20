@@ -1,6 +1,5 @@
-from collections import namedtuple, deque
-
-from math import sqrt, gcd, hypot, inf
+from collections import deque, namedtuple
+from math import gcd, hypot, inf, sqrt
 
 eps = 1e-14
 Vec2 = namedtuple('Vec2', ['x', 'y'])

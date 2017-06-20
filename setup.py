@@ -1,12 +1,10 @@
-from glob import glob
-
-from setuptools import Extension
-from setuptools import setup, find_packages
-from setuptools.command.test import test as TestCommand
-from Cython.Distutils import build_ext
-
 import os
 import sys
+from glob import glob
+
+from Cython.Distutils import build_ext
+from setuptools import Extension, find_packages, setup
+from setuptools.command.test import test as TestCommand
 
 
 class PyTest(TestCommand):

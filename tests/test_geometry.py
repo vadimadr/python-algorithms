@@ -1,13 +1,17 @@
-from hypothesis import given
-from hypothesis.strategies import floats, tuples, integers
 from math import hypot, isclose, sqrt
 
-from algorithms.geometry import Vec2, orthogonal, Vec3, l2, orientation, \
-    vec2_prod, vec3_prod, line, Line2, distance_to_line, line_projection, \
-    line_parallel, line_same, line_intersect, segment_intersection, \
-    segment_union_measure, segment_cover, polygon_area, points_inside, \
-    convex_polygon, circle_line_intersection, circle_intersection
+from hypothesis import given
+from hypothesis.strategies import floats, integers, tuples
 from tests.utils import float_eq
+
+from algorithms.geometry import (Line2, Vec2, Vec3, circle_intersection,
+                                 circle_line_intersection, convex_polygon,
+                                 distance_to_line, l2, line, line_intersect,
+                                 line_parallel, line_projection, line_same,
+                                 orientation, orthogonal, points_inside,
+                                 polygon_area, segment_cover,
+                                 segment_intersection, segment_union_measure,
+                                 vec2_prod, vec3_prod)
 
 
 def test_dot2():

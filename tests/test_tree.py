@@ -1,7 +1,7 @@
 from math import inf
 
 from hypothesis import given
-from hypothesis.strategies import lists, integers
+from hypothesis.strategies import integers, lists
 
 from algorithms.structures.tree import BinaryTree
 

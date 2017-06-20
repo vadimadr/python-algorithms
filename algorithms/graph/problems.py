@@ -1,7 +1,7 @@
 from collections import deque
 
 from algorithms.graph import Graph
-from algorithms.graph.searching import restore_path, dfs_iter
+from algorithms.graph.searching import dfs_iter, restore_path
 
 
 def find_cycle(g: Graph, v, p=None, c=None):
