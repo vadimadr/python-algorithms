@@ -9,27 +9,27 @@ from algorithms.graph import (AdjMxGraph, AdjSetGraph, EdgeListGraph,
                               is_complete_graph, subgraph, to_adjacency_list,
                               to_adjacency_matrix, to_edge_list, to_undirected)
 from algorithms.graph.problems import find_cycle, topological_sort, \
-    euler_graph_test, euler_path
+    euler_graph_test, euler_path, is_connected
 from algorithms.graph.searching import (bfs, bfs_iter, dfs_iter,
                                         dijkstra_search, restore_path,
                                         bellman_ford_search,
-                                        floyd_warshall_search)
+                                        floyd_warshall_search, kruskal_mst)
 from algorithms.graph.utils import normalize_edge_list, \
     normalize_adjacency_dict
 
 k5 = [(0, 1), (0, 2), (0, 3), (0, 4), (1, 2), (1, 3), (1, 4), (2, 3), (2, 4),
-    (3, 4)]
+      (3, 4)]
 k7 = [(0, 1), (0, 2), (0, 3), (0, 4), (0, 5), (0, 6), (1, 2), (1, 3), (1, 4),
-    (1, 5), (1, 6), (2, 3), (2, 4), (2, 5), (2, 6), (3, 4), (3, 5), (3, 6),
-    (4, 5), (4, 6), (5, 6)]
+      (1, 5), (1, 6), (2, 3), (2, 4), (2, 5), (2, 6), (3, 4), (3, 5), (3, 6),
+      (4, 5), (4, 6), (5, 6)]
 
 # complete bipariate graph
 k3_3 = [(0, 3), (0, 4), (0, 5), (1, 3), (1, 4), (1, 5), (2, 3), (2, 4), (2, 5)]
 
 k4_4m = [[0, 0, 0, 0, 1, 1, 1, 1], [0, 0, 0, 0, 1, 1, 1, 1],
-    [0, 0, 0, 0, 1, 1, 1, 1], [0, 0, 0, 0, 1, 1, 1, 1],
-    [1, 1, 1, 1, 0, 0, 0, 0], [1, 1, 1, 1, 0, 0, 0, 0],
-    [1, 1, 1, 1, 0, 0, 0, 0], [1, 1, 1, 1, 0, 0, 0, 0]]
+         [0, 0, 0, 0, 1, 1, 1, 1], [0, 0, 0, 0, 1, 1, 1, 1],
+         [1, 1, 1, 1, 0, 0, 0, 0], [1, 1, 1, 1, 0, 0, 0, 0],
+         [1, 1, 1, 1, 0, 0, 0, 0], [1, 1, 1, 1, 0, 0, 0, 0]]
 
 # star graph
 s6 = [(0, 1), (0, 2), (0, 3), (0, 4), (0, 5)]
@@ -62,14 +62,23 @@ def check_path(g, d, p, d_true):
     assert np.allclose(d, d_true)
 
 
+def check_mst(g, mst_graph, mst_list, mst_mx):
+    w = mst_mx.sum()
+    w0 = sum(v[2] for v in mst_list)
+    assert mst_graph.order() == g.order()
+    assert is_connected(g, 0)
+    assert abs(w0 - w) < 1e-6
+
+
 @pytest.fixture(scope="class", params=[AdjMxGraph, AdjSetGraph, EdgeListGraph],
-    ids=["Matrix", "Set", "Edge List"])
+                ids=["Matrix", "Set", "Edge List"])
 def graph_cls(request):
     request.cls.graph = request.param
 
 
 @pytest.mark.usefixtures("graph_cls")
 class TestGraphBasics:
+
     def testk5(self):
         g = self.graph.from_edge_list(k5)
         for i in range(5):
@@ -220,6 +229,7 @@ def test_normalize_adj_dict():
 
 @pytest.mark.usefixtures("graph_cls")
 class TestGraphUtils:
+
     def test_to_adjmx(self):
         g = self.graph.from_edge_list(k3_3)
         m = np.array(
@@ -240,7 +250,7 @@ class TestGraphUtils:
         g = self.graph.from_edge_list(k3_3)
 
         l = [(0, 3), (0, 4), (0, 5), (1, 3), (1, 4), (1, 5), (2, 3), (2, 4),
-            (2, 5)]
+             (2, 5)]
 
         assert sorted(l) == sorted(to_edge_list(g))
 
@@ -267,7 +277,7 @@ class TestGraphUtils:
         g2 = to_undirected(g)
 
         l = [(0, 3), (0, 4), (0, 5), (1, 3), (1, 4), (1, 5), (2, 3), (2, 4),
-            (2, 5)]
+             (2, 5)]
 
         assert l == to_edge_list(g2)
 
@@ -286,18 +296,25 @@ shortest_path_undirected1 = [
     [1, 2, 0, 0, 2],
     [2, 4, 0, 2, 0]]
 
+graph_mst = [(0, 1, 9), (0, 3, 3), (0, 2, 6), (1, 3, 9), (1, 5, 8), (1, 9, 18),
+             (2, 3, 4), (2, 4, 2), (2, 6, 9), (3, 4, 2), (3, 5, 9), (4, 6, 9),
+             (4, 5, 8),
+             (5, 6, 7), (5, 8, 9),
+             (5, 9, 10), (6, 7, 4), (6, 8, 5), (7, 8, 1), (7, 9, 4), (8, 9, 3)]
+
 
 @pytest.mark.usefixtures("graph_cls")
 class TestSearch:
+
     def test_dfs_iter(self):
         path1 = [0, 1, 2, 3, 4]  # expected dfs order
         path2 = [0, 1, 4, 3, 2]
 
         graph = np.array([[0, 1, 2, 0, 0],
-            [1, 0, 0, 0, 3],
-            [2, 0, 0, 7, 0],
-            [0, 0, 7, 0, 1],
-            [0, 3, 0, 1, 0]])
+                          [1, 0, 0, 0, 3],
+                          [2, 0, 0, 7, 0],
+                          [0, 0, 7, 0, 1],
+                          [0, 3, 0, 1, 0]])
 
         for directed, preorder in product([True, False], [True, False]):
             g1 = self.graph.from_edge_list(c5, directed=directed)
@@ -313,10 +330,10 @@ class TestSearch:
 
     def test_bfs_iter(self):
         graph = np.array([[0, 1, 2, 0, 0],
-            [1, 0, 0, 0, 3],
-            [2, 0, 0, 7, 0],
-            [0, 0, 7, 0, 1],
-            [0, 3, 0, 1, 0]])
+                          [1, 0, 0, 0, 3],
+                          [2, 0, 0, 7, 0],
+                          [0, 0, 7, 0, 1],
+                          [0, 3, 0, 1, 0]])
 
         path1 = [0, 1, 4, 2, 3]  # c5, undir
         path2 = [0, 1, 2, 3, 4]  # c5, dir
@@ -358,7 +375,7 @@ class TestSearch:
         directed_G = np.array(G, dtype=float)
 
         g = self.graph.from_adjacency_matrix(directed_G, directed=True,
-            weighted=True)
+                                             weighted=True)
         if one:
             P = []
             D = []
@@ -382,7 +399,7 @@ class TestSearch:
         directed_G = np.array(G, dtype=float)
 
         g = self.graph.from_adjacency_matrix(directed_G, directed=False,
-            weighted=True)
+                                             weighted=True)
         if one:
             P = []
             D = []
@@ -419,7 +436,7 @@ class TestSearch:
 
     def test_euler_graph(self):
         g1_ = [(0, 1), (0, 2), (1, 3), (1, 5), (2, 1), (2, 3), (3, 0), (3, 4),
-            (4, 0), (4, 2), (5, 4)]
+               (4, 0), (4, 2), (5, 4)]
         g2_ = [(0, 1), (1, 2), (2, 0), (3, 4), (4, 5), (5, 3)]  # two triangles
         g3_ = [(0, 3), (0, 4), (3, 1), (3, 2), (1, 2), (2, 0), (4, 1)]
 
@@ -439,3 +456,12 @@ class TestSearch:
 
             for w, u in zip(p, p[1:]):
                 assert g1_copy.has_edge(w, u)
+
+    def test_mst(self):
+        g = self.graph.from_edge_list(graph_mst, weighted=True, directed=False)
+        mx = to_adjacency_matrix(g)
+        tree = scipy_graph.minimum_spanning_tree(mx)
+
+        mst = kruskal_mst(g)
+        g2 = self.graph.from_edge_list(mst, weighted=True)
+        check_mst(g, g2, mst, tree)

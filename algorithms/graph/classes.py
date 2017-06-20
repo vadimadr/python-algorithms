@@ -157,14 +157,14 @@ class BaseGraph(ABC, metaclass=ABCMeta):
     def remove_edge(self, u, v):
         self._n_edges -= 1
 
-    def successors(self, v):
+    def successors(self, v, distances=True):
         # if an arrow (x,y) exists,
         # then y is said to be a direct successor of x
 
         for i in range(self._n_nodes):
             d = self.distance(v, i)
             if d > 0:
-                if self._weighted:
+                if self._weighted and distances:
                     yield i, d
                 else:
                     yield i
@@ -287,9 +287,9 @@ class AdjMxGraph(BaseGraph):
         else:
             yield from ids
 
-    def successors(self, v):
+    def successors(self, v, distances=True):
         ids = np.where(self._mx[v] > 0)[0]
-        if self._weighted:
+        if self._weighted and distances:
             weights = self._mx[v, ids]
             yield from zip(ids, weights)
         else:
@@ -344,8 +344,8 @@ class AdjSetGraph(BaseGraph):
         else:
             return 1 if v in self._graph[u] else 0
 
-    def successors(self, v):
-        if self.weighted:
+    def successors(self, v, distances=True):
+        if self.weighted and distances:
             yield from self._graph[v].items()
         else:
             yield from self._graph[v]
@@ -451,7 +451,7 @@ class EdgeListGraph(BaseGraph):
                 return ww
         return 0
 
-    def successors(self, v):
+    def successors(self, v, distances=True):
 
         i = bisect_left(self._edges, (v, 0))
 
@@ -472,7 +472,7 @@ class EdgeListGraph(BaseGraph):
                     break
 
                 node = self._edges[i]
-        if self._weighted:
+        if self._weighted and distances:
             yield from zip(ids, weights)
         else:
             yield from ids
@@ -526,7 +526,7 @@ class HashListGraph(BaseGraph):
 
             # TODO: if size > F(loadfactor) then resize
 
-    def successors(self, v):
+    def successors(self, v, distances=True):
         v_id = self._get_id(v)
 
         h = self._heads[v_id]
@@ -538,7 +538,7 @@ class HashListGraph(BaseGraph):
             ids.append(vv)
             if self._weighted:
                 weights.append(self._weights[h])
-        if self._weighted:
+        if self._weighted and distances:
             yield from self._get_edges(v, zip(ids, weights))
         else:
             yield from self._get_edges(v, ids)

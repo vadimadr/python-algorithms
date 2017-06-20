@@ -84,7 +84,8 @@ def to_adjacency_matrix(g: BaseGraph):
     for u in g:
         for v in g.successors(u):
             w = v[1] if g.weighted else 1
-            mx[u, v] = w
+            v_ = v[0] if g.weighted else v
+            mx[u, v_] = w
     return mx
 
 

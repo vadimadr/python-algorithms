@@ -1,3 +1,5 @@
+from collections import deque
+
 from algorithms.graph import Graph
 from algorithms.graph.searching import restore_path, dfs_iter
 
@@ -17,17 +19,25 @@ def find_cycle(g: Graph, v, p=None, c=None):
             if cycle:
                 return cycle
         elif c[u] == 1 and p[v] != u:  # cycle found
-            # cycle = [u_]
-            # while v_ != u_:
-            #     cycle.append(v_)
-            #     v_ = p[v_]
-            # cycle.append(u_)  # start of cycle
-            # cycle.reverse()
             cycle = restore_path(p, v)
             cycle.append(cycle[0])
             return cycle
     c[v] = 2
     return False
+
+
+def is_connected(g: Graph, start=0):
+    q = deque()
+
+    q.append(start)
+    used = [False] * g.order()
+    while q:
+        v = q.popleft()
+        used[v] = True
+        for u in g.successors(v, distances=False):
+            if not used[u]:
+                q.append(u)
+    return False not in used
 
 
 def topological_sort(g: Graph):

@@ -1,7 +1,9 @@
 from collections import deque
+from operator import itemgetter
 
 import numpy as np
 
+from algorithms.structures.disjoint_set import DisjointSet
 from algorithms.structures.heap import BinaryHeap
 from . import BaseGraph
 
@@ -273,3 +275,18 @@ def floyd_warshall_search(g: BaseGraph):
                     p[u, v] = p[i, v]
 
     return d, p
+
+
+def kruskal_mst(g: BaseGraph):
+    mst = []
+
+    edges = list(g.edges())
+    edges.sort(key=itemgetter(2))  # sort by weight
+    dsu = DisjointSet(g)
+
+    for e in edges:
+        if dsu.find_set(e[0]) != dsu.find_set(e[1]):
+            dsu.union(e[0], e[1])
+            mst.append(e)
+
+    return mst
