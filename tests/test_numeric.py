@@ -30,6 +30,7 @@ def nonprimes():
 
 
 class TestIs_prime:
+
     def test_is_prime(self, primes):
         for p in primes:
             assert is_prime(p), "Wrong result with p = %d" % p
@@ -40,6 +41,7 @@ class TestIs_prime:
 
 
 class TestFactor:
+
     def test_zero(self):
         assert factorize(0) == [(0, 1)]
 
@@ -65,6 +67,7 @@ class TestFactor:
 
 
 class TestSieve(TestCase):
+
     def test_sieve(self):
         self.assertEqual(sieve(2), [2])
         self.assertEqual(sieve(3), [2, 3])
@@ -81,8 +84,8 @@ class TestSieve(TestCase):
 
 
 @pytest.mark.parametrize("a,b,expected", (
-        (20, 100, 20), (15, 0, 15), (13, 13, 13), (37, 600, 1),
-        (624129, 2061517, 18913)))
+    (20, 100, 20), (15, 0, 15), (13, 13, 13), (37, 600, 1),
+    (624129, 2061517, 18913)))
 def test_gcd(a, b, expected):
     assert gcd(a, b) == expected
 

@@ -12,10 +12,10 @@ def is_heap(heap):
     for i in range(n):
         left_child = i * 2 + 1
         if left_child < n and (not maxheap and a[left_child] < a[i] or
-                maxheap and a[i] < a[left_child]):
+                               maxheap and a[i] < a[left_child]):
             return False
         if left_child + 1 < n and (not maxheap and (a[left_child + 1] < a[i])
-        or maxheap and a[i] < a[left_child + 1]):
+                                   or maxheap and a[i] < a[left_child + 1]):
             return False
     return True
 

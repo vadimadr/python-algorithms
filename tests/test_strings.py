@@ -60,6 +60,7 @@ def substr_method(request):
 
 @pytest.mark.usefixtures("substr_method")
 class TestSubstr:
+
     @pytest.mark.parametrize('t,s,e', substr_cases)
     def test_predefined(self, t, s, e):
         assert self.substr(s, t, 0, len(t)) == e

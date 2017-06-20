@@ -12,7 +12,7 @@ def bst_invariant(t, min_key=-inf, max_key=inf):
     if max_key <= t.key or t.key <= min_key:
         return False
     return bst_invariant(t.left, min_key, t.key) and \
-           bst_invariant(t.right, t.key, max_key)
+        bst_invariant(t.right, t.key, max_key)
 
 
 def test_bst():

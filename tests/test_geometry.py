@@ -198,7 +198,7 @@ def test_convex_polygon():
     xs = [Vec2(1, 1), Vec2(2, 2), Vec2(3, 1), Vec2(3, 3), Vec2(1, 3)]
     assert not convex_polygon(xs)
     xs = [Vec2(2, 1), Vec2(3, 1), Vec2(4, 2), Vec2(3, 3), Vec2(2, 3),
-        Vec2(1, 2)]
+          Vec2(1, 2)]
     assert convex_polygon(xs)
 
 
