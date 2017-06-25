@@ -23,6 +23,7 @@ priority queues or to sort without additional memory.
 
 
 class BinaryHeap:
+
     def __init__(self, data=None, maxheap=False):
         self.maxheap = maxheap
         if data:

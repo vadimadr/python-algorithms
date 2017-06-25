@@ -14,6 +14,7 @@ offline.
 
 
 class DisjointSet:
+
     def __init__(self, data):
         sz = max(data)
         self.parent = [-1] * sz  # compressed parent array.
