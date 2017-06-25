@@ -279,6 +279,15 @@ def floyd_warshall_search(g: BaseGraph):
 
 
 def kruskal_mst(g: BaseGraph):
+    """Kruskal's algorithms for finding minimum spanning tree in undirected
+    graph.
+
+    Put every vertex of graph into its own tree and connect disjoint trees
+    using minimal edge. Uses disjoint set structure for effectiveness.
+
+    Complexity: O(E*log(E) + E*α(V)) = O(E*log(E))
+    α(t) - inverse Ackermann function (almost constant)
+    """
     mst = []
 
     edges = list(g.edges())
@@ -286,8 +295,47 @@ def kruskal_mst(g: BaseGraph):
     dsu = DisjointSet(g)
 
     for e in edges:
+        # ends of edge are in different trees.
         if dsu.find_set(e[0]) != dsu.find_set(e[1]):
             dsu.union(e[0], e[1])
             mst.append(e)
+
+    return mst
+
+
+def prim_mst(g: BaseGraph):
+    """Prim's algorithm for finding minimum spanning tree in undirected
+    graph.
+
+    At each step, add vertex that is not in tree yet using minimal edge.
+    Finding minimal edge can be implemented using bst, bin. heap, fibonacci
+    heap or linear search.
+
+    Complexity: O(E*log(V^2)) = O(E*log(V)) - in case of using bin. heaps.
+    """
+    mst = []
+    n = g.order()
+    d = [inf] * n  # minimal edge to each vertex
+    pred = [-1] * n
+    used = [False] * n  # needed because elements are not deleted from heap
+    pq = BinaryHeap()
+    d[0] = 0
+    pq.push((0, 0))
+    while pq.data:
+        dist, u = pq.pop()
+        used[u] = True
+
+        if dist != d[u]:
+            continue
+
+        if pred[u] != -1:
+            mst.append((pred[u], u, dist))
+
+        # check if adding u to tree decreases minimal edges.
+        for v, w in g.successors(u):
+            if w < d[v] and not used[v]:
+                d[v] = w
+                pred[v] = u
+                pq.push((w, v))
 
     return mst

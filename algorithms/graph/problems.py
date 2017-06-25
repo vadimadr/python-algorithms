@@ -12,7 +12,7 @@ def find_cycle(g: Graph, v, p=None, c=None):
         c = [0] * g.order()
 
     c[v] = 1
-    for u in g.neighbours(v):
+    for u in g.successors(v, distances=False):
         if c[u] == 0:
             p[u] = v
             cycle = find_cycle(g, u, p, c)

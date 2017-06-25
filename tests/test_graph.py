@@ -14,7 +14,7 @@ from algorithms.graph.problems import (euler_graph_test, euler_path,
 from algorithms.graph.searching import (bellman_ford_search, bfs, bfs_iter,
                                         dfs_iter, dijkstra_search,
                                         floyd_warshall_search, kruskal_mst,
-                                        restore_path)
+                                        restore_path, prim_mst)
 from algorithms.graph.utils import (normalize_adjacency_dict,
                                     normalize_edge_list)
 
@@ -63,11 +63,12 @@ def check_path(g, d, p, d_true):
     assert np.allclose(d, d_true)
 
 
-def check_mst(g, mst_graph, mst_list, mst_mx):
-    w = mst_mx.sum()
+def check_mst(origin_graph, mst_graph, mst_list, reference_mst_mx):
+    w = reference_mst_mx.sum()
     w0 = sum(v[2] for v in mst_list)
-    assert mst_graph.order() == g.order()
-    assert is_connected(g, 0)
+    assert mst_graph.order() == origin_graph.order()
+    assert is_connected(mst_graph, 0)
+    assert not find_cycle(mst_graph, 0)
     assert abs(w0 - w) < 1e-6
 
 
@@ -373,22 +374,21 @@ class TestSearch:
         (floyd_warshall_search, False),
     ], ids=['Dijkstra', 'Bellman-Ford', 'Floyd-Warshall'])
     def test_shortest_path_directed(self, method, one, G):
-        directed_G = np.array(G, dtype=float)
-
-        g = self.graph.from_adjacency_matrix(directed_G, directed=True,
+        graph_mx_ = np.array(G, dtype=float)
+        graph_ = self.graph.from_adjacency_matrix(graph_mx_, directed=True,
                                              weighted=True)
         if one:
             P = []
             D = []
-            for i in g:
-                d, p = method(g, i)
+            for i in graph_:
+                d, p = method(graph_, i)
                 P.append(p)
                 D.append(d)
         else:
-            D, P = method(g)
+            D, P = method(graph_)
 
-        D_ = scipy_graph.shortest_path(directed_G, directed=g.directed)
-        check_path(g, D, P, D_)
+        D_ = scipy_graph.shortest_path(graph_mx_, directed=graph_.directed)
+        check_path(graph_, D, P, D_)
 
     @pytest.mark.parametrize('G', [shortest_path_undirected1])
     @pytest.mark.parametrize('method,one', [
@@ -397,22 +397,21 @@ class TestSearch:
         (floyd_warshall_search, False),
     ], ids=['Dijkstra', 'Bellman-Ford', 'Floyd-Warshall'])
     def test_shortest_path_undirected(self, method, one, G):
-        directed_G = np.array(G, dtype=float)
-
-        g = self.graph.from_adjacency_matrix(directed_G, directed=False,
+        graph_mx_ = np.array(G, dtype=float)
+        graph_ = self.graph.from_adjacency_matrix(graph_mx_, directed=False,
                                              weighted=True)
         if one:
             P = []
             D = []
-            for i in g:
-                d, p = method(g, i)
+            for i in graph_:
+                d, p = method(graph_, i)
                 P.append(p)
                 D.append(d)
         else:
-            D, P = method(g)
+            D, P = method(graph_)
 
-        D_ = scipy_graph.shortest_path(directed_G, directed=g.directed)
-        check_path(g, D, P, D_)
+        D_ = scipy_graph.shortest_path(graph_mx_, directed=graph_.directed)
+        check_path(graph_, D, P, D_)
 
     def test_restore_path(self):
         assert restore_path([-1, 0, 1, 2, 3], 4) == [0, 1, 2, 3, 4]
@@ -458,11 +457,13 @@ class TestSearch:
             for w, u in zip(p, p[1:]):
                 assert g1_copy.has_edge(w, u)
 
-    def test_mst(self):
+    @pytest.mark.parametrize('mst_algo', [kruskal_mst, prim_mst],
+                             ids=['Kruskal', 'Prim'])
+    def test_mst(self, mst_algo):
         g = self.graph.from_edge_list(graph_mst, weighted=True, directed=False)
         mx = to_adjacency_matrix(g)
-        tree = scipy_graph.minimum_spanning_tree(mx)
+        scipy_mst = scipy_graph.minimum_spanning_tree(mx)
 
-        mst = kruskal_mst(g)
-        g2 = self.graph.from_edge_list(mst, weighted=True)
-        check_mst(g, g2, mst, tree)
+        mst = mst_algo(g)
+        mst_graph = self.graph.from_edge_list(mst, weighted=True)
+        check_mst(g, mst_graph, mst, scipy_mst)
