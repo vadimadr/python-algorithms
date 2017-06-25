@@ -169,26 +169,26 @@ class BaseGraph(ABC, metaclass=ABCMeta):
                 else:
                     yield i
 
-    def predecessors(self, v):
+    def predecessors(self, v, distances=True):
         # if an arrow (x,y) exists,
         # then x is said to be a direct predecessor of y
 
         for i in range(self._n_nodes):
             d = self.distance(i, v)
             if d > 0:
-                if self._weighted:
+                if self._weighted and distances:
                     yield i, d
                 else:
                     yield i
 
-    def neighbours(self, v):
+    def neighbours(self, v, distances=True):
         # Enumerate all adjacent nodes
 
         if not self._directed:
-            yield from self.successors(v)
+            yield from self.successors(v, distances=distances)
         else:
-            yield from self.successors(v)
-            yield from self.predecessors(v)
+            yield from self.successors(v, distances=distances)
+            yield from self.predecessors(v, distances=distances)
 
     def edges(self):
         for u in range(self._n_nodes):
@@ -279,9 +279,9 @@ class AdjMxGraph(BaseGraph):
 
         self._mx[u, v] = 0
 
-    def predecessors(self, v):
+    def predecessors(self, v, distances=True):
         ids = np.where(self._mx[..., v] > 0)[0]
-        if self._weighted:
+        if self._weighted and distances:
             weights = self._mx[v, ids]
             yield from zip(ids, weights)
         else:
@@ -330,7 +330,7 @@ class AdjSetGraph(BaseGraph):
         if self._weighted:
             self._graph[u][v] = weight
             if not self._directed:
-                self._graph[u][v] = weight
+                self._graph[v][u] = weight
         else:
             self._graph[u].add(v)
             if not self._directed:
@@ -350,20 +350,19 @@ class AdjSetGraph(BaseGraph):
         else:
             yield from self._graph[v]
 
-    def predecessors(self, v):
+    def predecessors(self, v, distances=True):
         ids = []
-        if not self._weighted:
-            for u, adj_set in enumerate(self._graph):
-                if v in adj_set:
-                    ids.append(u)
-            yield from ids
-        else:
-            weights = []
-            for u, adj_set in enumerate(self._graph):
-                if v in adj_set:
-                    ids.append(u)
+        weights = []
+        for u, adj_set in enumerate(self._graph):
+            if v in adj_set:
+                ids.append(u)
+                if self._weighted and distances:
                     weights.append(adj_set[v])
+
+        if self._weighted and distances:
             yield from zip(ids, weights)
+        else:
+            yield from ids
 
     def remove_edge(self, u, v):
         super().remove_edge(u, v)
