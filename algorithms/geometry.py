@@ -221,6 +221,73 @@ def segment_intersection(a: Vec2, b: Vec2, c: Vec2, d: Vec2):
         return p if c_ else False
 
 
+def circle_line_intersection(p, r, l):
+    """Finds intersection of a line with a circle
+
+    Parameters
+    -----------
+    p : Vec2
+        Center of a circle
+    r
+        radius of a circle
+    l : Line2
+
+    Returns
+    ---------
+    n : int
+        number of intersection points
+    pts
+        intersection points
+    """
+    # move circle and line to the origin
+    l0 = Line2(l.a, l.b, l.c + l.a * p.x + l.b * p.y)
+    a, b, c = l0
+    # closest to the origin point on line
+    x0 = Vec2(-a * c / (a * a + b * b) + p.x, -b * c / (a * a + b * b) + p.y)
+    # distance from line to the origin
+    d = abs(c) / hypot(a, b)
+    if d > r:
+        return 0, ()
+    elif abs(d - r) < eps:
+        return 1, (x0,)
+    else:
+        # distance from x0 to intersection points
+        d0 = sqrt(r * r - d * d)
+        # (-b, a) is collinear with l
+        dx = -b * d0 / hypot(a, b)
+        dy = a * d0 / hypot(a, b)
+        return 2, (Vec2(x0.x + dx, x0.y + dy), Vec2(x0.x - dx, x0.y - dy))
+
+
+def circle_intersection(p1, r1, p2, r2):
+    """Finds intersection of two circles with centers p1 and p2 and radius
+    r1 and r2
+
+    Method
+    -------
+    Assume first circle is at the origin, then solve the system of equations:
+    x^2 + y^2 = r1^2
+    (x - x0)^2 + (y - y0)^2 = r2^2
+
+    and subtract the first equation from the second:
+    x (-2x0) + y (-2y0) + (x0^2 + y0^2 + r1^2 - r2^2) = 0
+    """
+    # centers are identical
+    if abs(p1.x - p2.x) < 1e-6 and abs(p1.y - p2.y) < 1e-6:
+        if abs(r1 - r2) < 1e-6:
+            return inf, ()  # circles are identical
+        else:
+            return 0, ()  # circles do not intersect
+
+    p2 = Vec2(p2.x - p1.x, p2.y - p1.y)
+    a = -2 * p2.x
+    b = -2 * p2.y
+    c = p2.x ** 2 + p2.y ** 2 + r1 ** 2 - r2 ** 2
+    n, ips = circle_line_intersection(Vec2(0, 0), r1, Line2(a, b, c))
+
+    return n, [Vec2(x + p1.x, y + p1.y) for x, y in ips]
+
+
 def segment_union_measure(xs):
     """Returns length of union of segments"""
     p = []
@@ -351,68 +418,36 @@ def convex_polygon(pts):
     return True
 
 
-def circle_line_intersection(p, r, l):
-    """Finds intersection of a line with a circle
-
-    Parameters
-    -----------
-    p : Vec2
-        Center of a circle
-    r
-        radius of a circle
-    l : Line2
-
-    Returns
-    ---------
-    n : int
-        number of intersection points
-    pts
-        intersection points
+def convex_hull(pts):
+    """Constructs the convex hull of a set of points in O(n*log(n)). Using
+    Graham-Andrew algorithm (modified Graham's scan). Constructs the upper
+    and the lower parts of the separately.
     """
-    # move circle and line to the origin
-    l0 = Line2(l.a, l.b, l.c + l.a * p.x + l.b * p.y)
-    a, b, c = l0
-    # closest to the origin point on line
-    x0 = Vec2(-a * c / (a * a + b * b) + p.x, -b * c / (a * a + b * b) + p.y)
-    # distance from line to the origin
-    d = abs(c) / hypot(a, b)
-    if d > r:
-        return 0, ()
-    elif abs(d - r) < eps:
-        return 1, (x0,)
-    else:
-        # distance from x0 to intersection points
-        d0 = sqrt(r * r - d * d)
-        # (-b, a) is collinear with l
-        dx = -b * d0 / hypot(a, b)
-        dy = a * d0 / hypot(a, b)
-        return 2, (Vec2(x0.x + dx, x0.y + dy), Vec2(x0.x - dx, x0.y - dy))
+    if len(pts) < 2:
+        return pts
 
+    pts.sort()  # sort points lexicographically
+    l, r = pts[0], pts[-1]  # leftmost and rightmost points
+    up_ = [l]  # stack of points that are currently in the convex hull.
+    down_ = [l]
 
-def circle_intersection(p1, r1, p2, r2):
-    """Finds intersection of two circles with centers p1 and p2 and radius
-    r1 and r2
+    for p in pts[1:]:
+        # test whether p is from the upper part
+        # collinear points goes to the either of them, the will not be in
+        # convex hull anyway
+        if orientation(l, p, r) < 0 or p is r:
+            # test whether last 3 points in the hull (including current) are
+            # counter-clockwise
+            while len(up_) > 1 and orientation(up_[-2], up_[-1], p) >= 0:
+                up_.pop()
+            up_.append(p)
 
-    Method
-    -------
-    Assume first circle is at the origin, then solve the system of equations:
-    x^2 + y^2 = r1^2
-    (x - x0)^2 + (y - y0)^2 = r2^2
+        if orientation(l, p, r) > 0 or p is r:
+            while len(down_) > 1 and orientation(down_[-2], down_[-1], p) <= 0:
+                down_.pop()
+            down_.append(p)
 
-    and subtract the first equation from the second:
-    x (-2x0) + y (-2y0) + (x0^2 + y0^2 + r1^2 - r2^2) = 0
-    """
-    # centers are identical
-    if abs(p1.x - p2.x) < 1e-6 and abs(p1.y - p2.y) < 1e-6:
-        if abs(r1 - r2) < 1e-6:
-            return inf, ()  # circles are identical
-        else:
-            return 0, ()  # circles do not intersect
-
-    p2 = Vec2(p2.x - p1.x, p2.y - p1.y)
-    a = -2 * p2.x
-    b = -2 * p2.y
-    c = p2.x ** 2 + p2.y ** 2 + r1 ** 2 - r2 ** 2
-    n, ips = circle_line_intersection(Vec2(0, 0), r1, Line2(a, b, c))
-
-    return n, [Vec2(x + p1.x, y + p1.y) for x, y in ips]
+    # add l and r only 1 times.
+    # points will be unordered.
+    conv_hull = up_ + down_[1:-1]
+    return conv_hull

@@ -11,7 +11,7 @@ from algorithms.geometry import (Line2, Vec2, Vec3, circle_intersection,
                                  orientation, orthogonal, points_inside,
                                  polygon_area, segment_cover,
                                  segment_intersection, segment_union_measure,
-                                 vec2_prod, vec3_prod)
+                                 vec2_prod, vec3_prod, convex_hull)
 
 
 def test_dot2():
@@ -246,3 +246,16 @@ def test_circle_circle_intersect():
     assert point_on_circle(p0, ip1[1], r0)
     assert point_on_circle(p1, ip1[0], r1)
     assert point_on_circle(p1, ip1[1], r1)
+
+
+def test_convex_hull():
+    p1 = [(0, 0), (0, 1)]
+    p2 = [(0, 0), (1, 1), (2, 0)]
+    p3 = [(0, 0), (2, 0), (0, 2), (2, 2), (1, 1)]
+
+    cp1 = sorted(convex_hull([Vec2(*p) for p in p1]))
+    cp2 = sorted(convex_hull([Vec2(*p) for p in p2]))
+    cp3 = sorted(convex_hull([Vec2(*p) for p in p3]))
+    assert cp1 == p1
+    assert cp2 == p2
+    assert cp3 == sorted([(0, 0), (2, 0), (0, 2), (2, 2)])
