@@ -2,9 +2,37 @@ from collections import deque, namedtuple
 from math import gcd, hypot, inf, sqrt
 
 eps = 1e-14
-Vec2 = namedtuple('Vec2', ['x', 'y'])
-Vec3 = namedtuple('Vec3', ['x', 'y', 'z'])
 Line2 = namedtuple('Line2', ['a', 'b', 'c'])
+vec3_base = namedtuple('Vec3', ['x', 'y', 'z'])
+vec2_base = namedtuple('Vec2', ['x', 'y'])
+
+
+class Vec2(vec2_base):
+    def __add__(self, other):
+        return Vec2(self.x + other.x, self.y + other.y)
+
+    def __sub__(self, other):
+        return Vec2(self.x - other.x, self.y - other.y)
+
+    def __mul__(self, other):
+        return Vec2(self.x * other, self.y * other)
+
+
+class Vec3(vec3_base):
+    def __add__(self, other):
+        return Vec3(self.x + other.x,
+                    self.y + other.y,
+                    self.z + other.z)
+
+    def __sub__(self, other):
+        return Vec3(self.x - other.x,
+                    self.y - other.y,
+                    self.z - other.z)
+
+    def __mul__(self, other):
+        return Vec3(self.x * other,
+                    self.y * other,
+                    self.z * other)
 
 
 def det2(a, b, c, d):
@@ -451,3 +479,32 @@ def convex_hull(pts):
     # points will be unordered.
     conv_hull = up_ + down_[1:-1]
     return conv_hull
+
+
+def angle_cmp(a: Vec2, b: Vec2, origin=None):
+    """Test whether polar angle or a less than polar angle of b"""
+    if origin:
+        a = a - origin
+        b = b - origin
+    # atan(y1/x1) < atan(y2/x2)
+    return a.y * b.x < b.y * a.x
+
+
+class AngleComparator:
+    def __init__(self, x, origin=None):
+        self.x = x
+        self.origin = origin
+
+    def __lt__(self, other):
+        return angle_cmp(self.x, other.x, self.origin)
+
+
+def sort_convex_hull(pts):
+    """Sort points of convex hull in counter-clockwise order. And puts
+    leftmost point at first position
+    """
+    leftmost = min(pts)
+    pts_sorted = sorted(pts, key=lambda a: AngleComparator(a, origin=leftmost))
+    idx = pts_sorted.index(leftmost)
+    pts_rotated = pts_sorted[idx:] + pts_sorted[:idx]
+    return pts_rotated

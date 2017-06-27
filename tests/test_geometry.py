@@ -1,7 +1,7 @@
 from math import hypot, isclose, sqrt
 
-from hypothesis import given
-from hypothesis.strategies import floats, integers, tuples
+from hypothesis import given, event, example
+from hypothesis.strategies import floats, integers, tuples, lists
 from tests.utils import float_eq
 
 from algorithms.geometry import (Line2, Vec2, Vec3, circle_intersection,
@@ -11,7 +11,8 @@ from algorithms.geometry import (Line2, Vec2, Vec3, circle_intersection,
                                  orientation, orthogonal, points_inside,
                                  polygon_area, segment_cover,
                                  segment_intersection, segment_union_measure,
-                                 vec2_prod, vec3_prod, convex_hull)
+                                 vec2_prod, vec3_prod, convex_hull,
+                                 sort_convex_hull)
 
 
 def test_dot2():
@@ -198,7 +199,7 @@ def test_convex_polygon():
     xs = [Vec2(1, 1), Vec2(2, 2), Vec2(3, 1), Vec2(3, 3), Vec2(1, 3)]
     assert not convex_polygon(xs)
     xs = [Vec2(2, 1), Vec2(3, 1), Vec2(4, 2), Vec2(3, 3), Vec2(2, 3),
-          Vec2(1, 2)]
+        Vec2(1, 2)]
     assert convex_polygon(xs)
 
 
@@ -259,3 +260,23 @@ def test_convex_hull():
     assert cp1 == p1
     assert cp2 == p2
     assert cp3 == sorted([(0, 0), (2, 0), (0, 2), (2, 2)])
+
+
+@given(lists(tuples(integers(-30, 30), integers(-30, 30)),
+             min_size=3, max_size=50))
+def test_is_latest(pts):
+    cv = convex_hull([Vec2(*p) for p in pts])
+    cv_sorted = sort_convex_hull(cv)
+    assert convex_polygon(cv_sorted)
+    leftmost = min(cv)
+    event("leftmost is first: %r" % (leftmost == cv_sorted[0],))
+    assert leftmost == cv_sorted[0]
+
+
+def test_convex_hull_sort():
+    p1 = [(1, 0), (0, 2), (2, 0), (0, 1)]
+    p_sorted = sort_convex_hull([Vec2(*p) for p in p1])
+    leftmost = min(p_sorted)
+    assert leftmost == p_sorted[0]
+
+    assert p_sorted == [(0, 1), (1, 0), (2, 0), (0, 2)]
