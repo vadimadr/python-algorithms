@@ -482,10 +482,16 @@ def convex_hull(pts):
 
 
 def angle_cmp(a: Vec2, b: Vec2, origin=None):
-    """Test whether polar angle or a less than polar angle of b"""
+    """Test whether polar angle or a less than polar angle of b. Does not
+    distinguish collinear points. """
     if origin:
         a = a - origin
         b = b - origin
+
+    # for the case if points are symmetric
+    if a.y <= 0 and b.y > 0:
+        return True
+
     # atan(y1/x1) < atan(y2/x2)
     return a.y * b.x < b.y * a.x
 
@@ -503,6 +509,7 @@ def sort_convex_hull(pts):
     """Sort points of convex hull in counter-clockwise order. And puts
     leftmost point at first position
     """
+    # TODO: collinear points
     leftmost = min(pts)
     pts_sorted = sorted(pts, key=lambda a: AngleComparator(a, origin=leftmost))
     idx = pts_sorted.index(leftmost)
