@@ -1,3 +1,4 @@
+from bisect import bisect_right
 from collections import deque, namedtuple
 from math import gcd, hypot, inf, sqrt
 
@@ -515,3 +516,27 @@ def sort_convex_hull(pts):
     idx = pts_sorted.index(leftmost)
     pts_rotated = pts_sorted[idx:] + pts_sorted[:idx]
     return pts_rotated
+
+
+def point_inside_convex_polygon(poly, p):
+    """Test whether point (strictly) lies inside a convex polygon. Assumes
+    that polygon is sorted in counter-clockwise order."""
+    # lexicographically lowest point
+    first = poly[0]
+
+    if p < first:
+        return False
+
+    # Check if point lies on first or last edge. For strictly inside only.
+    if abs(orientation(first, poly[1], p)) < eps or \
+            abs(orientation(first, poly[-1], p)) < eps:
+        return False
+
+    angle_comparable = [AngleComparator(p, origin=first) for p in poly]
+
+    # split polygon into triangles. Find sector in which p is lies using
+    # binary search.
+    it = bisect_right(angle_comparable, AngleComparator(p, origin=first))
+    if it != len(poly) and it != 0:
+        return orientation(poly[it], poly[it - 1], p) < 0
+    return False

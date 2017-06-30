@@ -14,7 +14,8 @@ from algorithms.geometry import (Line2, Vec2, Vec3, circle_intersection,
                                  polygon_area, segment_cover,
                                  segment_intersection, segment_union_measure,
                                  vec2_prod, vec3_prod, convex_hull,
-                                 sort_convex_hull, angle_cmp)
+                                 sort_convex_hull, angle_cmp,
+                                 point_inside_convex_polygon)
 
 
 def test_dot2():
@@ -294,3 +295,19 @@ def test_is_latest(pts):
     leftmost = min(cv)
     event("leftmost is first: %r" % (leftmost == cv_sorted[0],))
     assert leftmost == cv_sorted[0]
+
+
+def test_point_inside_convex_polygon():
+    # tested on 166B
+    poly = [(0, 0), (4, 0), (6, 5), (4, 5), (0, 3)]
+    poly = [Vec2(*p) for p in poly]
+    inside = [(1, 1), (2, 2), (1, 3), (3, 3), (2, 1)]
+    inside = [Vec2(*p) for p in inside]
+    outsie = [(0, 0), (1, 0), (10, 0), (0, 3), (-3, 1), (8, 8), (5, 5), (6,4)]
+    outsie = [Vec2(*p) for p in outsie]
+
+    for p in inside:
+        assert point_inside_convex_polygon(poly, p)
+
+    for p in outsie:
+        assert not point_inside_convex_polygon(poly, p)
