@@ -506,18 +506,6 @@ class AngleComparator:
         return angle_cmp(self.x, other.x, self.origin)
 
 
-def sort_convex_hull(pts):
-    """Sort points of convex hull in counter-clockwise order. And puts
-    leftmost point at first position
-    """
-    # TODO: collinear points
-    leftmost = min(pts)
-    pts_sorted = sorted(pts, key=lambda a: AngleComparator(a, origin=leftmost))
-    idx = pts_sorted.index(leftmost)
-    pts_rotated = pts_sorted[idx:] + pts_sorted[:idx]
-    return pts_rotated
-
-
 def point_inside_convex_polygon(poly, p):
     """Test whether point (strictly) lies inside a convex polygon. Assumes
     that polygon is sorted in counter-clockwise order."""

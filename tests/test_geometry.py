@@ -275,28 +275,6 @@ def test_angle_cmp():
             assert angle_cmp(pts[i], pts[j])
 
 
-@mark.skip
-def test_convex_hull_sort():
-    p1 = [(1, 0), (0, 2), (3, -1), (0, 1), (2, -1)]
-    p_sorted = sort_convex_hull([Vec2(*p) for p in p1])
-    leftmost = min(p_sorted)
-    assert leftmost == p_sorted[0]
-
-    assert p_sorted == [(0, 1), (1, 0), (2, 0), (0, 2)]
-
-
-@mark.skip
-@given(lists(tuples(integers(-30, 30), integers(-30, 30)),
-             min_size=3, max_size=50))
-def test_is_latest(pts):
-    cv = convex_hull([Vec2(*p) for p in pts])
-    cv_sorted = sort_convex_hull(cv)
-    assert convex_polygon(cv_sorted)
-    leftmost = min(cv)
-    event("leftmost is first: %r" % (leftmost == cv_sorted[0],))
-    assert leftmost == cv_sorted[0]
-
-
 def test_point_inside_convex_polygon():
     # tested on 166B
     poly = [(0, 0), (4, 0), (6, 5), (4, 5), (0, 3)]
