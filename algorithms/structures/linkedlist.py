@@ -1,5 +1,12 @@
 class LinkedList:
-    """Double linked list implementation"""
+    """Double linked list implementation.
+
+    Alternatively, linked list can be implemented using three arrays: key,
+    next, prev and global variable free that points to first unused array
+    entry. Free works as stack: after adding an element to the list, free is
+    set to next[free].
+    """
+
     def __init__(self, key=None, next_=None, prev=None):
         self.key = key
         self.next = next_
