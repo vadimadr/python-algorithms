@@ -12,7 +12,7 @@ def bst_invariant(t, min_key=-inf, max_key=inf):
     if max_key <= t.key or t.key <= min_key:
         return False
     return bst_invariant(t.left, min_key, t.key) and \
-        bst_invariant(t.right, t.key, max_key)
+           bst_invariant(t.right, t.key, max_key)
 
 
 def test_bst():
@@ -58,3 +58,20 @@ def test_bst_delete():
 def test_bst_invariant(t):
     bst = BinaryTree.from_list(t)
     assert bst_invariant(bst)
+
+
+@given(lists(integers(), min_size=2, max_size=20, unique=True), integers(0, 1))
+def test_bst_invariant_rotations(t, left):
+    bst = BinaryTree.from_list(t)
+
+    # try rotate every node
+    for node in bst.depth_first():
+        if left and node.right is None or not left and node.left is None:
+            continue
+
+        before_rotation = [n.key for n in node.breadth_first()]
+        new_root = node.rotate(bool(left))
+        assert bst_invariant(node)
+        old_root = new_root.rotate(not bool(left))
+        assert node == old_root
+        assert before_rotation == [n.key for n in node.breadth_first()]

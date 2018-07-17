@@ -1,4 +1,5 @@
 from collections import deque
+from enum import Enum
 
 
 class BaseTree:
@@ -43,18 +44,19 @@ class BinaryTree(BaseTree):
     def add(self, key):
         if self.key is None:
             self.key = key
-            return
+            return self
 
         parent = self.search(key)
 
         if key == parent.key:
-            return
+            return parent
 
-        node = BinaryTree(key, parent)
+        node = self.__class__(key, parent)
         if key < parent.key:
             parent.left = node
         else:
             parent.right = node
+        return node
 
     def search(self, key):
         node = self
@@ -141,6 +143,51 @@ class BinaryTree(BaseTree):
             p = u.parent
         return p
 
+    def rotate(self, left=True):
+        """
+        Performs sub-tree rotation. Does not violates RB-tree properties
+        left-rot -> <- right-rot
+            X             X
+          c   Y         Y   c
+             a b       a b
+
+        Returns new sub-tree root after rotation
+        """
+        if left:
+            return self._left_rotate()
+        else:
+            return self._right_rotate()
+
+    def _left_rotate(self):
+        x, y = self, self.right
+        assert y is not None, "Right parent is assumed to exist before left rotation"
+        y.parent = x.parent
+        if y.parent and y.parent.left is x:
+            y.parent.left = y
+        elif y.parent and y.parent.right is x:
+            y.parent.right = y
+        x.right = y.left
+        if x.right:
+            x.right.parent = x
+        y.left = x
+        x.parent = y
+        return y
+
+    def _right_rotate(self):
+        x, y = self, self.left
+        assert y is not None, "Left parent is assumed to exist before right rotation"
+        y.parent = x.parent
+        if y.parent and y.parent.right is x:
+            y.parent.right = y
+        elif y.parent and y.parent.left is x:
+            y.parent.left = y
+        x.left = y.right
+        if x.left:
+            x.left.parent = x
+        y.right = x
+        x.parent = y
+        return y
+
     def _get_child(self, i):
         if len(self.children) != 0:
             return self.children[i]
@@ -197,3 +244,47 @@ class BinaryTree(BaseTree):
             tree.add(n)
 
         return tree
+
+
+class _RBColor(Enum):
+    RED = 0
+    BLACK = 1
+
+
+RED = _RBColor.RED
+BLACK = _RBColor.BLACK
+
+
+class RedBlackTree(BinaryTree):
+    """
+    properties:
+    1. Every node is either RED or BLACK
+    2. The root is always black
+    3. Every leaf (virtual) leaf is black
+    4. If node is RED then both children are BLACK
+    5. For each node x , all paths to a leve contains same number of black nodes = bh(x)
+    """
+
+    def __init__(self, key, *args, **kwargs):
+        super().__init__(key, *args, **kwargs)
+        # init NIL-like node
+        self.color = BLACK
+        self.parent = self  # make it parent to itself
+
+    def add(self, key):
+        new_node = super().add(key)
+        new_node.color = RED
+        # fix RBT properties after insertion
+        z = new_node
+        while z.parent.color is RED:
+            # at most 1 property may be violated (2 or 4) at any iterationR
+            if z.parent == z.parent.parent.left:
+                y = z.parent.parent.right
+                if y.color is RED:
+                    # resolve case 1
+                    z.parent.color = BLACK
+                    y.color = BLACK
+                    z.parent.parent.color = RED
+                    z = z.parent.parent
+
+        self.root.color = BLACK
