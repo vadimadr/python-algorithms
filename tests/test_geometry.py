@@ -13,8 +13,7 @@ from algorithms.geometry import (Line2, Vec2, Vec3, circle_intersection,
                                  orientation, orthogonal, points_inside,
                                  polygon_area, segment_cover,
                                  segment_intersection, segment_union_measure,
-                                 vec2_prod, vec3_prod, convex_hull,
-                                 sort_convex_hull, angle_cmp,
+                                 vec2_prod, vec3_prod, convex_hull, angle_cmp,
                                  point_inside_convex_polygon)
 
 
@@ -281,7 +280,7 @@ def test_point_inside_convex_polygon():
     poly = [Vec2(*p) for p in poly]
     inside = [(1, 1), (2, 2), (1, 3), (3, 3), (2, 1)]
     inside = [Vec2(*p) for p in inside]
-    outsie = [(0, 0), (1, 0), (10, 0), (0, 3), (-3, 1), (8, 8), (5, 5), (6,4)]
+    outsie = [(0, 0), (1, 0), (10, 0), (0, 3), (-3, 1), (8, 8), (5, 5), (6, 4)]
     outsie = [Vec2(*p) for p in outsie]
 
     for p in inside:
