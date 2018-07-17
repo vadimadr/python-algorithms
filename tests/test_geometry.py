@@ -1,10 +1,7 @@
 from math import hypot, isclose, sqrt
 
-from hypothesis import given, event, example
-from hypothesis.strategies import floats, integers, tuples, lists
-from pytest import mark
-
-from tests.utils import float_eq
+from hypothesis import given
+from hypothesis.strategies import floats, integers, tuples
 
 from algorithms.geometry import (Line2, Vec2, Vec3, circle_intersection,
                                  circle_line_intersection, convex_polygon,
@@ -15,6 +12,7 @@ from algorithms.geometry import (Line2, Vec2, Vec3, circle_intersection,
                                  segment_intersection, segment_union_measure,
                                  vec2_prod, vec3_prod, convex_hull, angle_cmp,
                                  point_inside_convex_polygon)
+from tests.utils import float_eq
 
 
 def test_dot2():
@@ -201,7 +199,7 @@ def test_convex_polygon():
     xs = [Vec2(1, 1), Vec2(2, 2), Vec2(3, 1), Vec2(3, 3), Vec2(1, 3)]
     assert not convex_polygon(xs)
     xs = [Vec2(2, 1), Vec2(3, 1), Vec2(4, 2), Vec2(3, 3), Vec2(2, 3),
-        Vec2(1, 2)]
+          Vec2(1, 2)]
     assert convex_polygon(xs)
 
 
@@ -267,7 +265,7 @@ def test_convex_hull():
 def test_angle_cmp():
     # points sorted in counter-clockwise order
     pts = [Vec2(-2, 0), Vec2(-1, -2), Vec2(0, -3), Vec2(1, -2), Vec2(1, 1),
-        Vec2(1, 2), Vec2(0, 3), Vec2(-1, 2)]
+           Vec2(1, 2), Vec2(0, 3), Vec2(-1, 2)]
 
     for i in range(len(pts)):
         for j in range(i + 1, len(pts)):
