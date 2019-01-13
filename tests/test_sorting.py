@@ -1,11 +1,16 @@
 from unittest import TestCase
 
 import numpy as np
+import pytest
 from hypothesis import strategies as st
 from hypothesis import given
 
 from algorithms.sorting import *
-from algorithms.sorting._sorting import fast_sort_wrap
+
+try:
+    from algorithms.sorting._sorting import fast_sort_wrap
+except:
+    fast_sort_wrap = None
 from algorithms.sorting.merge import merge_lists, merge_n_lists, merge_sort
 
 
@@ -228,14 +233,15 @@ class BaseMergeSortTest(BaseSortTest):
     sort_method = merge_sort
 
 
-def test_fast_sort():
-    np.random.seed(456)
-    xs = np.random.randint(100, size=64)
-    xs_sorted = fast_sort_wrap(xs)
-    assert is_sorted(xs_sorted)
+@pytest.mark.skipif(fast_sort_wrap is None, reason="cython extension is not compilled")
+class TestCythonExtensionSort:
+    def test_fast_sort(self):
+        np.random.seed(456)
+        xs = np.random.randint(100, size=64)
+        xs_sorted = fast_sort_wrap(xs)
+        assert is_sorted(xs_sorted)
 
-
-@given(xs=st.lists(st.integers(min_value=-1000, max_value=1000)))
-def test_sort_auto(xs):
-    xs_sorted = fast_sort_wrap(xs)
-    assert is_sorted(xs_sorted)
+    @given(xs=st.lists(st.integers(min_value=-1000, max_value=1000)))
+    def test_sort_auto(self, xs):
+        xs_sorted = fast_sort_wrap(xs)
+        assert is_sorted(xs_sorted)
