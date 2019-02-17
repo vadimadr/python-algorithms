@@ -1,9 +1,7 @@
-import os
 import sys
-from glob import glob
 
 from Cython.Distutils import build_ext
-from setuptools import Extension, find_packages, setup
+from setuptools import find_packages, setup
 from setuptools.command.test import test as TestCommand
 
 
@@ -19,36 +17,6 @@ class PyTest(TestCommand):
 
         errno = pytest.main(self.pytest_args)
         sys.exit(errno)
-
-
-def compile_cython(use_cython=True):
-    source_root = os.path.abspath(os.path.dirname(__file__))
-    cython_extensions = [
-        'algorithms.sorting._sorting',
-    ]
-
-    extensions = []
-
-    for ext in cython_extensions:
-        source_file = os.path.join(source_root, *ext.split('.'))
-        source_dir = os.path.dirname(source_file)
-
-        depends = []
-
-        pxd_source = source_file + '.pxd'
-        pyx_source = source_file + '.pyx'
-
-        if os.path.exists(pxd_source):
-            depends.append(pxd_source)
-
-        # handles src/*.cpp
-        depends.extend(glob(os.path.join(source_dir, 'src', '*.c*')))
-
-        extensions.append(
-            Extension(ext, sources=[pyx_source], depends=depends,
-                      language='c++'))
-
-    return extensions
 
 
 requirements = [
@@ -72,13 +40,9 @@ setup(
     license='MIT',
     author='Vadim Andronov', author_email='vadimadr@gmail.com',
     description='Implementation of some common algorithms',
-    ext_modules=compile_cython(),
     zip_safe=False,
     package_data={'': 'LICENSE'},
     install_requires=requirements,
-    setup_requires=[
-        'cython',
-    ],
     tests_require=test_requirements,
     test_suite='tests',
     cmdclass={'test': PyTest, 'build_ext': build_ext},
