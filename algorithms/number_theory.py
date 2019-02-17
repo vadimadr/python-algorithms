@@ -74,6 +74,8 @@ def extended_euclidian(a, b):
     # Recursive version O(log^2(a))
     # suppose we know x1, y1 for (b, a%b) and a%b = a - b*q
     # then b*x1 + (a%b)*y1 = a*y1 + b*(x1 - y1*q)
+    if a == b == 0:
+        return 0, 0, 0
     if b == 0:
         return 1, 0, a
     x, y, d = extended_euclidian(b, a % b)
@@ -283,3 +285,41 @@ def euler_phi(n):
         phi -= phi // p
 
     return phi
+
+
+def binpow(x, r):
+    """Binary exponential algorithm"""
+
+    # recursive implementation:
+    # if even(r):
+    #     ans = binpow(x, r // 2)
+    #     return ans * ans
+    # else:
+    #     return binpow(x, r - 1) * x
+    ans = 1
+    while r > 0:
+        if odd(r):
+            ans *= x
+        x *= x
+        r = r // 2
+    return ans
+
+
+def linear_diophantine(a, b, c):
+    """Solve ax + by = c, where x, y are integers
+
+    1. solution exists iff c % gcd(a,b) = 0
+    2. all solutions have form (x0 + b'k, y0 - a'k)
+
+    Returns
+    -------
+    None if no solutions exists
+    (x0, y0, a', b') otherwise
+    """
+    # d = pa + qb
+    p, q, d = extended_euclidian(a, b)
+    if d == 0 or c % d != 0:
+        return None
+    # ax + by = c <=> a'x + b'y = c'
+    a, b, c = a // d, b // d, c // d
+    return p * c, q * c, a, b

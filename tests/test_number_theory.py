@@ -3,11 +3,12 @@ from functools import reduce
 from unittest import TestCase
 
 import pytest
-from hypothesis import given
+from hypothesis import given, assume
 from hypothesis.strategies import integers
 
 from algorithms.number_theory import (binomial, euler_phi, even, factorize,
-                                      fibonacci, gcd, is_prime, odd, sieve)
+                                      fibonacci, gcd, is_prime, odd, sieve, binpow, linear_diophantine,
+                                      extended_euclidian)
 
 _dir = os.path.dirname(__file__)
 
@@ -81,8 +82,8 @@ class TestSieve(TestCase):
 
 
 @pytest.mark.parametrize("a,b,expected", (
-    (20, 100, 20), (15, 0, 15), (13, 13, 13), (37, 600, 1),
-    (624129, 2061517, 18913)))
+        (20, 100, 20), (15, 0, 15), (13, 13, 13), (37, 600, 1),
+        (624129, 2061517, 18913)))
 def test_gcd(a, b, expected):
     assert gcd(a, b) == expected
 
@@ -90,9 +91,25 @@ def test_gcd(a, b, expected):
 @given(integers(), integers())
 def test_gcd_invariant(a, b):
     d = gcd(a, b)
-    if d != 0:
-        assert a % d == 0
-        assert b % d == 0
+    if a == 0 and b == 0:
+        assert d == 0
+        return
+    assert d != 0
+    assert a % d == 0
+    assert b % d == 0
+
+
+@given(integers(), integers())
+def test_extended_gcd_invariant(a, b):
+    p, q, d = extended_euclidian(a, b)
+    assert d == gcd(a, b)
+    if d == 0:
+        assert p == q == 0
+        return
+    assert d != 0
+    assert a % d == 0
+    assert b % d == 0
+    assert a * p + b * q == d
 
 
 def test_even():
@@ -124,3 +141,28 @@ def test_euler_phi():
     assert euler_phi(4242) == 1200
 
 
+def test_binpow():
+    assert binpow(2, 0) == 2 ** 0
+    assert binpow(2, 1) == 2 ** 1
+    assert binpow(2, 2) == 2 ** 2
+    assert binpow(2, 3) == 2 ** 3
+    assert binpow(2, 10) == 2 ** 10
+    assert binpow(3, 13) == 3 ** 13
+
+
+@given(integers(), integers(), integers())
+def test_linear_diophantine(a, b, c):
+    assume(a != 0 and b != 0)
+    solution = linear_diophantine(a, b, c)
+    d = gcd(a, b)
+    if d == 0 or c % d != 0:
+        assert solution is None
+        return
+    x0, y0, a0, b0 = solution
+    for k in range(1, 10):
+        assert (x0 + b0 * k) * a + (y0 - a0 * k) * b == c
+
+
+def test_lind():
+    ans = linear_diophantine(1, 1, 0)
+    assert ans is not None
