@@ -1,40 +1,7 @@
-from collections import deque
-from enum import Enum
+from algorithms.structures.tree.base import BaseTree
 
 
-class BaseTree:
-
-    def __init__(self, parent=None, *args, **kwargs):
-        self.parent = parent
-        self.children = []
-
-    @property
-    def leaf(self):
-        return len(self.children) == 0
-
-    @property
-    def root(self):
-        return self.parent is None
-
-    def depth_first(self):
-        yield self
-        for c in self.children:
-            if c is not None:
-                yield from c.depth_first()
-
-    def breadth_first(self):
-        q = deque()
-        q.append(self)
-
-        while q:
-            node = q.popleft()
-            yield node
-            for c in node.children:
-                if c is not None:
-                    q.append(c)
-
-
-class BinaryTree(BaseTree):
+class BinarySearchTree(BaseTree):
     """Binary Search Tree"""
 
     def __init__(self, key, parent=None, *args, **kwargs):
@@ -46,12 +13,16 @@ class BinaryTree(BaseTree):
             self.key = key
             return self
 
-        parent = self.search(key)
+        # search for the leaf
+        parent, next = self, self
+        while next is not None:
+            parent = next
+            if key < next.key:
+                next = next.left
+            else:
+                next = next.right
 
-        if key == parent.key:
-            return parent
-
-        node = self.__class__(key, parent)
+        node = self.__class__(key, parent, root=self.root)
         if key < parent.key:
             parent.left = node
         else:
@@ -60,7 +31,6 @@ class BinaryTree(BaseTree):
 
     def search(self, key):
         node = self
-
         while not node.leaf and node.key != key:
             if key < node.key:
                 if node.left is None:
@@ -154,39 +124,39 @@ class BinaryTree(BaseTree):
         Returns new sub-tree root after rotation
         """
         if left:
-            return self._left_rotate()
+            new_root = self._left_rotate()
         else:
-            return self._right_rotate()
+            new_root = self._right_rotate()
+        return new_root
 
     def _left_rotate(self):
         x, y = self, self.right
         assert y is not None, "Right parent is assumed to exist before left rotation"
-        y.parent = x.parent
-        if y.parent and y.parent.left is x:
-            y.parent.left = y
-        elif y.parent and y.parent.right is x:
-            y.parent.right = y
-        x.right = y.left
-        if x.right:
-            x.right.parent = x
-        y.left = x
-        x.parent = y
+        c, a, b = x.left, y.left, y.right
+        x._swap_nodes(y)
+        x.left, x.right = y, b
+        if b:
+            b.parent = x
+        y.left, y.right = c, a
+        if c:
+            c.parent = y
         return y
 
     def _right_rotate(self):
         x, y = self, self.left
         assert y is not None, "Left parent is assumed to exist before right rotation"
-        y.parent = x.parent
-        if y.parent and y.parent.right is x:
-            y.parent.right = y
-        elif y.parent and y.parent.left is x:
-            y.parent.left = y
-        x.left = y.right
-        if x.left:
-            x.left.parent = x
-        y.right = x
-        x.parent = y
+        c, a, b = x.right, y.left, y.right
+        x._swap_nodes(y)
+        x.left, x.right = a, y
+        if a:
+            a.parent = x
+        y.left, y.right = b, c
+        if c:
+            c.parent = y
         return y
+
+    def _swap_nodes(self, other):
+        self.key, other.key = other.key, self.key
 
     def _get_child(self, i):
         if len(self.children) != 0:
@@ -244,47 +214,3 @@ class BinaryTree(BaseTree):
             tree.add(n)
 
         return tree
-
-
-class _RBColor(Enum):
-    RED = 0
-    BLACK = 1
-
-
-RED = _RBColor.RED
-BLACK = _RBColor.BLACK
-
-
-class RedBlackTree(BinaryTree):
-    """
-    properties:
-    1. Every node is either RED or BLACK
-    2. The root is always black
-    3. Every leaf (virtual) leaf is black
-    4. If node is RED then both children are BLACK
-    5. For each node x , all paths to a leve contains same number of black nodes = bh(x)
-    """
-
-    def __init__(self, key, *args, **kwargs):
-        super().__init__(key, *args, **kwargs)
-        # init NIL-like node
-        self.color = BLACK
-        self.parent = self  # make it parent to itself
-
-    def add(self, key):
-        new_node = super().add(key)
-        new_node.color = RED
-        # fix RBT properties after insertion
-        z = new_node
-        while z.parent.color is RED:
-            # at most 1 property may be violated (2 or 4) at any iterationR
-            if z.parent == z.parent.parent.left:
-                y = z.parent.parent.right
-                if y.color is RED:
-                    # resolve case 1
-                    z.parent.color = BLACK
-                    y.color = BLACK
-                    z.parent.parent.color = RED
-                    z = z.parent.parent
-
-        self.root.color = BLACK
