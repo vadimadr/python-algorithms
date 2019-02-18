@@ -19,15 +19,17 @@ def lower_bound(a, val, lo, hi):
 
 
 def lower_bound2(a, val, start, end):
-    n = end - start
-    while n > 0:
-        mid = start + n // 2
-        if a[mid] < val:
-            start = mid + 1
-            n = n - (n // 2) - 1
-        else:
-            n //= 2
-    return start
+    """This implementation of binary search is less error-prone
+    while still working in O(log n) time. It uses simple linear search
+    with decreasing step size.
+    """
+    step = end - start
+    pos = start - 1
+    while step > 0:
+        while pos + step < end and a[pos + step] < val:
+            pos += step
+        step //= 2
+    return pos + 1
 
 
 def upper_bound(a, val, lo, hi):

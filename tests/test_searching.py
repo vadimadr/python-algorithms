@@ -3,7 +3,7 @@ from unittest.case import TestCase
 from algorithms.searching import (equal_range, longest_common_subsequence,
                                   longest_increasing_subsequence, lower_bound,
                                   maximum_sum_subarray, maximum_sum_subarray2,
-                                  upper_bound)
+                                  upper_bound, lower_bound2)
 
 
 class TestBinSearch(TestCase):
@@ -53,6 +53,7 @@ class TestBinSearch(TestCase):
         for a, val, hi, lo in self.cases:
             self.assertEqual(hi, upper_bound(a, val, 0, len(a)))
             self.assertEqual(lo, lower_bound(a, val, 0, len(a)))
+            self.assertEqual(lo, lower_bound2(a, val, 0, len(a)))
 
     def testNormal(self):
         a = [1, 2, 3, 4, 4, 4, 5, 6, 7]
