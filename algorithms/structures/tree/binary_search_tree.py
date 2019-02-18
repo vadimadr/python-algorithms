@@ -22,7 +22,7 @@ class BinarySearchTree(BaseTree):
             else:
                 next = next.right
 
-        node = self.__class__(key, parent, root=self.root)
+        node = self.__class__(key, parent)
         if key < parent.key:
             parent.left = node
         else:
@@ -43,9 +43,12 @@ class BinarySearchTree(BaseTree):
         return node
 
     def delete(self, key):
-        v = self.search(key)
-        if v.key != key:
-            return
+        if isinstance(key, self.__class__):
+            v = key
+        else:
+            v = self.search(key)
+            if v.key != key:
+                return
         p = v.parent
         if p is not None:
             i = 0 if p.left is v else 1
@@ -121,7 +124,9 @@ class BinarySearchTree(BaseTree):
           c   Y         Y   c
              a b       a b
 
-        Returns new sub-tree root after rotation
+        Returns node that was in the root position before rotation.
+
+        We do not store pointer to the tree root explicitly, thus we don't move root node and use swap instead
         """
         if left:
             new_root = self._left_rotate()

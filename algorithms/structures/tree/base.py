@@ -6,11 +6,11 @@ class BaseTree:
     def __init__(self, parent=None, root=None, *args, **kwargs):
         self.parent = parent
         self.children = []
-        self.root = root if root else self
+        self._root = root if root else self
 
     @property
     def leaf(self):
-        return len(self.children) == 0
+        return len(self.children) == 0 or not any(self.children)
 
     @property
     def is_root(self):
@@ -32,3 +32,10 @@ class BaseTree:
             for c in node.children:
                 if c is not None:
                     q.append(c)
+
+    @property
+    def root(self):
+        root = self
+        while root.parent:
+            root = root.parent
+        return root

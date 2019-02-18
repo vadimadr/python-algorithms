@@ -1,7 +1,7 @@
 from math import inf
 
-from hypothesis import given
-from hypothesis.strategies import integers, lists
+from hypothesis import given, assume, settings
+from hypothesis.strategies import integers, lists, composite, permutations, sets
 
 from algorithms.structures.tree.binary_search_tree import BinarySearchTree
 from algorithms.structures.tree.red_black_tree import RedBlackTree, BLACK, RED
@@ -12,6 +12,9 @@ def bst_invariant(t, min_key=-inf, max_key=inf, parent=None):
         return True
     if t.parent is not parent:
         return False
+
+    if t.key is None:
+        return t.left is None and t.right is None and t.parent is None
 
     # for some types of BST left child may be equal to the right child
     # e.g. RedBlackTree.from_list([1,0,0]) --> (0, (0, 1))
@@ -167,3 +170,40 @@ def test_rb_tree_invariant(t):
     tree = RedBlackTree.from_list(t)
     assert bst_invariant(tree)
     check_rb_tree_properties(tree)
+
+
+def test_rb_deletion():
+    insertions = [7, 3, 18, 10, 22, 8, 11, 26, 2, 6, 13]
+    deletions = [18, 11, 3, 10, 22, 6, 2, 7, 26]
+    tree = RedBlackTree.from_list(insertions)
+    for k in deletions:
+        tree.delete(k)
+        assert bst_invariant(tree)
+        check_rb_tree_properties(tree)
+        assert k not in tree
+
+
+@composite
+def insert_delete_queries(draw):
+    insertions = draw(lists(integers()))
+    insertions = list(set(insertions))
+    assume(len(insertions) > 0)
+    n_deletions = draw(integers(min(len(insertions), len(insertions) // 2 + 1), len(insertions)))
+    deletions = draw(permutations(insertions))[:n_deletions]
+    queries = [('i', x) for x in draw(permutations(insertions))] + [('d', x) for x in deletions]
+    return queries
+
+
+@given(insert_delete_queries())
+def test_rb_queries(queries):
+    tree = RedBlackTree(queries[0][1])
+
+    for t, q in queries[1:]:
+        if t == 'i':
+            tree.add(q)
+        else:
+            tree.delete(q)
+            assert q not in tree
+
+        assert bst_invariant(tree)
+        check_rb_tree_properties(tree)
