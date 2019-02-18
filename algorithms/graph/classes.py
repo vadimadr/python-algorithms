@@ -296,7 +296,7 @@ class AdjMxGraph(BaseGraph):
             yield from ids
 
     def distance(self, u, v):
-        if super().distance(u, v) is 0:
+        if super().distance(u, v) == 0:
             return 0
 
         return self._mx[u, v]
@@ -337,7 +337,7 @@ class AdjSetGraph(BaseGraph):
                 self._graph[v].add(u)
 
     def distance(self, u, v):
-        if super().distance(u, v) is 0:
+        if super().distance(u, v) == 0:
             return 0
         if self._weighted:
             return self._graph[u].get(v, 0)

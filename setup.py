@@ -1,6 +1,5 @@
 import sys
 
-from Cython.Distutils import build_ext
 from setuptools import find_packages, setup
 from setuptools.command.test import test as TestCommand
 
@@ -45,5 +44,5 @@ setup(
     install_requires=requirements,
     tests_require=test_requirements,
     test_suite='tests',
-    cmdclass={'test': PyTest, 'build_ext': build_ext},
+    cmdclass={'test': PyTest},
 )
