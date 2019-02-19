@@ -47,7 +47,21 @@ class RedBlackTree(BinarySearchTree):
         self.color, other.color = other.color, self.color
 
     def add(self, key):
-        """Inserts a new node and fixes violations of RB-Tree properties"""
+        """
+        Inserts a new node and fixes violations of RB-Tree properties
+
+        Insertion fix-up. Capitals are black nodes, lowercase are red nodes. z is the newly inserted node.
+        ">" points to the node that potentially breaks the RB properties. When z is the right child, tree must be
+        reflected symmetrically
+
+                case 1                  case 2                       case 3
+            G            g         G              G             G            > P
+           / \          / \       / \            / \           / \            / \
+          p   u   ->   P   U     p   U   ->     p   U         p   U   ->     z   g
+          |            |          \            /             /                    \
+        > z            z         > z        > z           > z                      U
+
+        """
         new_node = super().add(key)
         new_node.color = RED  # inserted node is always RED
         # fix RBT properties after insertion
@@ -130,6 +144,26 @@ class RedBlackTree(BinarySearchTree):
             self._restore_delete(x, y.parent)
 
     def _restore_delete(self, x, parent=None):
+        """
+        Deletion fix-up. X is the node that takes place of transplanted (or deleted) node.
+        "tick" symbol means "keep the same color". Reflect tree symmetrically if x is the right child.
+
+                  case 1                     case 2
+            P                B         p'           > P
+           / \              / \       / \            / \
+          X   b     ->     p   V     X   B     ->   X   b
+             / \          / \           / \            / \
+            U   V        X   U         U   V          U   V
+
+
+                 case 3                       case 4
+            p'           > P'          p'               b'
+           / \            / \         / \              / \
+          X   B     ->   X   U       X   B     ->     P   V
+             / \              \         / \          / \
+            u   V              b       u'  v        X   u'
+
+        """
         # x points to the node that takes place of the y
         # it may be None iff y had no children
         while parent and color(x) is BLACK:
