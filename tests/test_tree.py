@@ -3,6 +3,7 @@ from math import inf
 from hypothesis import given, assume, settings
 from hypothesis.strategies import integers, lists, composite, permutations, sets
 
+from algorithms.structures.tree.avl_tree import AVLTree
 from algorithms.structures.tree.binary_search_tree import BinarySearchTree
 from algorithms.structures.tree.red_black_tree import RedBlackTree, BLACK, RED
 
@@ -42,6 +43,17 @@ def check_rb_tree_properties(tree, root=True):
     if tree.color is BLACK:
         return num_blacks + 1
     return num_blacks
+
+
+def check_avl_properties(tree):
+    if tree is None:
+        return 0
+    left_height = check_avl_properties(tree.left)
+    right_height = check_avl_properties(tree.right)
+
+    assert abs(left_height - right_height) < 2
+    assert tree.height == max(left_height, right_height) + 1
+    return tree.height
 
 
 def is_left_child(parent, child):
@@ -207,3 +219,25 @@ def test_rb_queries(queries):
 
         assert bst_invariant(tree)
         check_rb_tree_properties(tree)
+
+
+@given(lists(integers()))
+def test_avl_tree_invariant(t):
+    tree = AVLTree.from_list(t)
+    assert bst_invariant(tree)
+    check_avl_properties(tree)
+
+
+@given(insert_delete_queries())
+def test_avl_queries(queries):
+    tree = AVLTree(queries[0][1])
+
+    for t, q in queries[1:]:
+        if t == 'i':
+            tree.add(q)
+        else:
+            tree.delete(q)
+            assert q not in tree
+
+        assert bst_invariant(tree)
+        check_avl_properties(tree)

@@ -43,45 +43,50 @@ class BinarySearchTree(BaseTree):
         return node
 
     def delete(self, key):
+        """
+        Returns:
+            v: deleted node (contains the new value)
+            y: transplanted node (deleted from the tree)
+            x: node that takes place of the transplanted node
+
+        """
         if isinstance(key, self.__class__):
             v = key
         else:
             v = self.search(key)
             if v.key != key:
                 return
-        p = v.parent
-        if p is not None:
-            i = 0 if p.left is v else 1
 
-        # deleted node is leaf
-        if v.leaf:
-            if p is not None:
-                p.children[i] = None
+        # deleted node has less than two children
+        if v.left is None or v.right is None:
+            x = v.left or v.right
+            if v.parent and v.parent.left is v:
+                v.parent.left = x
+            elif v.parent and v.parent.right is v:
+                v.parent.right = x
+            if x:
+                v.key = x.key
+                v.children = x.children
+                x.parent = v.parent
             else:
                 v.key = None
-            return
+            return v, v, x
 
-        # deleted node has one child
-        if v.left is None or v.right is None:
-            u = v.left or v.right
-            u.parent = p
-            if p is not None:
-                p.children[i] = u
-            else:
-                v.key = u.key
-                v.children = u.children
-            return
+        # find the node that will replace deleted node
+        y = v.successor()
 
-        # deleted node has two children
-        # swap v and its predecessor
-        u = v.successor()
-        v.key = u.key
-        if u.parent.left is u:
-            u.parent.left = u.right
+        # replace y with y.right
+        x = y.right
+        if y.parent.left is y:
+            y.parent.left = x
         else:
-            u.parent.right = u.right
-        if u.right is not None:
-            u.right.parent = u.parent
+            y.parent.right = x
+        if y.right:
+            y.right.parent = y.parent
+
+        # replace v with y
+        v.key = y.key
+        return v, y, x
 
     def successor(self):
         """return node with key, that is successor of current node key"""

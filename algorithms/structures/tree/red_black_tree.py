@@ -1,6 +1,6 @@
 from enum import Enum
 
-from algorithms.structures.tree.binary_search_tree import BinarySearchTree
+from .binary_search_tree import BinarySearchTree
 
 
 class RBColor(Enum):
@@ -98,46 +98,9 @@ class RedBlackTree(BinarySearchTree):
         return new_node
 
     def delete(self, key):
-        if isinstance(key, self.__class__):
-            v = key
-        else:
-            v = self.search(key)
-            if v.key != key:
-                return
+        # standard tree deletion procedure
+        v, y, x = super().delete(key)
 
-        if v.parent and v.parent.left is v:
-            i = 0
-        elif v.parent:
-            i = 1
-
-        if v.left is None or v.right is None:
-            x = v.left or v.right
-            if v.parent:
-                v.parent.children[i] = x
-            if x:
-                v.key = x.key
-                v.children = x.children
-                x.parent = v.parent
-            else:
-                v.key = None
-            if v.color is BLACK:
-                self._restore_delete(x, v.parent)
-            return
-
-        # find the node that will replace deleted node
-        y = v.successor()
-
-        # replace y with y.right
-        x = y.right
-        if y.parent.left is y:
-            y.parent.left = x
-        else:
-            y.parent.right = x
-        if y.right:
-            y.right.parent = y.parent
-
-        # replace v with y
-        v.key = y.key
         if y.color is BLACK:
             # y was black => it may cause path containing y to have
             # one black node less. Need to restore properties
