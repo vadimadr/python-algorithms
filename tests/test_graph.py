@@ -1,13 +1,18 @@
+import operator
 from itertools import product
 from operator import eq
 
+from hypothesis import assume, given, event
+from hypothesis.extra.numpy import arrays, array_shapes
+from hypothesis.strategies import composite, lists, integers, tuples, permutations, floats
 import numpy as np
 import pytest
 from scipy.sparse import csgraph as scipy_graph
 
 from algorithms.graph import (AdjMxGraph, AdjSetGraph, EdgeListGraph,
                               is_complete_graph, subgraph, to_adjacency_list,
-                              to_adjacency_matrix, to_edge_list, to_undirected)
+                              to_adjacency_matrix, to_edge_list, to_undirected, maxflow)
+from algorithms.graph.maxflow import ford_fulkerson
 from algorithms.graph.problems import (euler_graph_test, euler_path,
                                        find_cycle, is_connected,
                                        topological_sort)
@@ -236,7 +241,7 @@ class TestGraphUtils:
         g = self.graph.from_edge_list(k3_3)
         m = np.array(
             [[0, 0, 0, 1, 1, 1], [0, 0, 0, 1, 1, 1], [0, 0, 0, 1, 1, 1],
-                [1, 1, 1, 0, 0, 0], [1, 1, 1, 0, 0, 0], [1, 1, 1, 0, 0, 0]],
+             [1, 1, 1, 0, 0, 0], [1, 1, 1, 0, 0, 0], [1, 1, 1, 0, 0, 0]],
             dtype=float)
 
         assert (m == to_adjacency_matrix(g)).all()
@@ -376,7 +381,7 @@ class TestSearch:
     def test_shortest_path_directed(self, method, one, G):
         graph_mx_ = np.array(G, dtype=float)
         graph_ = self.graph.from_adjacency_matrix(graph_mx_, directed=True,
-                                             weighted=True)
+                                                  weighted=True)
         if one:
             P = []
             D = []
@@ -399,7 +404,7 @@ class TestSearch:
     def test_shortest_path_undirected(self, method, one, G):
         graph_mx_ = np.array(G, dtype=float)
         graph_ = self.graph.from_adjacency_matrix(graph_mx_, directed=False,
-                                             weighted=True)
+                                                  weighted=True)
         if one:
             P = []
             D = []
@@ -467,3 +472,57 @@ class TestSearch:
         mst = mst_algo(g)
         mst_graph = self.graph.from_edge_list(mst, weighted=True)
         check_mst(g, mst_graph, mst, scipy_mst)
+
+
+@composite
+def random_adj_mx(draw):
+    seed = draw(integers(0, 1000))
+    prob = draw(floats(0, 1))
+    caps = integers(0, 100)
+    n = draw(integers(2, 30))
+    adj_mx = draw(arrays(np.int, (n, n), caps))
+
+    rg = np.random.RandomState(seed)
+    mask = rg.binomial(1, prob, (n, n))
+    return adj_mx * mask
+
+
+def check_flow_is_correct(graph, flow, s, t):
+    adj_mx = to_adjacency_matrix(graph)
+    # F[i][j] == -F[j][i]
+    np.testing.assert_array_almost_equal(flow, -flow.T)
+    np.testing.assert_almost_equal(flow[s, :].sum(), flow[:, t].sum())
+    np.testing.assert_almost_equal(np.delete(flow.sum(1), [s, t]), 0)
+    np.testing.assert_array_compare(operator.__le__, flow, adj_mx)
+
+
+def check_flow_is_maximal(graph, flow, s, t):
+    # try to push some flow
+    pred = np.full(len(flow), -1)
+    pred[s] = s
+
+    def dfs(v):
+        if v == t:
+            return True
+        for u, d in graph.successors(v):
+            if pred[u] == -1 and flow[v][u] < d:
+                pred[u] = v
+                if dfs(u):
+                    return True
+        return False
+
+    assert not dfs(s)
+
+
+@pytest.mark.usefixtures("graph_cls")
+class TestMaxFlow:
+    @given(random_adj_mx())
+    def test_random(self, adj_mx):
+        graph = self.graph.from_adjacency_matrix(adj_mx, weighted=True, directed=True)
+        mf, F = ford_fulkerson(graph)
+        start_flow = (F[0, :] > 0).sum()
+
+        event("MF > 0" if mf > 0 else "MF = 0")
+        event("start_flow = %d" % start_flow)
+        check_flow_is_correct(graph, F, 0, len(F) - 1)
+        check_flow_is_maximal(graph, F, 0, len(F) - 1)
