@@ -2,17 +2,17 @@ import operator
 from itertools import product
 from operator import eq
 
-from hypothesis import assume, given, event
-from hypothesis.extra.numpy import arrays, array_shapes
-from hypothesis.strategies import composite, lists, integers, tuples, permutations, floats
 import numpy as np
 import pytest
+from hypothesis import given, event, settings
+from hypothesis.extra.numpy import arrays
+from hypothesis.strategies import composite, integers, floats
 from scipy.sparse import csgraph as scipy_graph
 
 from algorithms.graph import (AdjMxGraph, AdjSetGraph, EdgeListGraph,
                               is_complete_graph, subgraph, to_adjacency_list,
-                              to_adjacency_matrix, to_edge_list, to_undirected, maxflow)
-from algorithms.graph.maxflow import ford_fulkerson
+                              to_adjacency_matrix, to_edge_list, to_undirected)
+from algorithms.graph.maxflow import ford_fulkerson, edmonds_karp
 from algorithms.graph.problems import (euler_graph_test, euler_path,
                                        find_cycle, is_connected,
                                        topological_sort)
@@ -504,8 +504,8 @@ def check_flow_is_maximal(graph, flow, s, t):
     def dfs(v):
         if v == t:
             return True
-        for u, d in graph.successors(v):
-            if pred[u] == -1 and flow[v][u] < d:
+        for u, d in graph.neighbours(v):
+            if pred[u] == -1 and flow[v][u] < graph.distance(v, u):
                 pred[u] = v
                 if dfs(u):
                     return True
@@ -514,15 +514,65 @@ def check_flow_is_maximal(graph, flow, s, t):
     assert not dfs(s)
 
 
+maxflow_cases = [
+    ([(0, 1, 7), (0, 3, 4), (1, 2, 5), (1, 4, 3), (2, 5, 8), (3, 1, 3), (3, 4, 2), (4, 2, 3), (4, 5, 5)], 10),
+    ([(0, 1, 3), (0, 3, 3), (1, 2, 3), (1, 3, 2), (2, 4, 4), (3, 4, 2), (3, 5, 2), (4, 5, 3)], 5),
+    ([(0, 1, 2), (1, 0, 2), (1, 4, 5), (4, 1, 5), (0, 2, 6), (2, 0, 6), (2, 3, 2), (3, 2, 2), (3, 4, 1), (4, 3, 1),
+      (2, 1, 3), (1, 2, 3), (1, 3, 1), (3, 1, 1)], 6),
+    ([(0, 1, 1), (0, 2, 1), (0, 3, 1), (1, 4, 1), (1, 5, 1), (2, 5, 1), (2, 6, 1), (3, 6, 1), (4, 7, 1), (5, 7, 1),
+      (6, 7, 1)], 3),
+    ([(0, 1, 2), (0, 2, 1), (1, 3, 2), (2, 3, 1)], 3),
+    ([(0, 1, 1), (0, 2, 2), (1, 3, 1), (2, 3, 2)], 3),
+    ([(0, 1, 2), (0, 2, 2), (1, 3, 1), (2, 3, 2), (1, 2, 1)], 3),
+    ([(0, 1, 2), (0, 2, 2), (1, 3, 2), (2, 3, 2), (1, 2, 1)], 4),
+    ([(0, 1, 2), (0, 2, 2), (1, 3, 1), (2, 3, 2), (2, 1, 1)], 3),
+    ([(0, 1, 2), (0, 2, 2), (1, 3, 2), (2, 3, 2), (2, 1, 1)], 4),
+    ([(0, 4, 1), (1, 5, 1), (2, 4, 1), (3, 2, 1), (5, 2, 1), (5, 6, 1)], 0),
+]
+
+
 @pytest.mark.usefixtures("graph_cls")
 class TestMaxFlow:
     @given(random_adj_mx())
-    def test_random(self, adj_mx):
+    def test_ford_fulkerson__random(self, adj_mx):
         graph = self.graph.from_adjacency_matrix(adj_mx, weighted=True, directed=True)
         mf, F = ford_fulkerson(graph)
-        start_flow = (F[0, :] > 0).sum()
 
+        start_flow = (F[0, :] > 0).sum()
         event("MF > 0" if mf > 0 else "MF = 0")
         event("start_flow = %d" % start_flow)
+
         check_flow_is_correct(graph, F, 0, len(F) - 1)
         check_flow_is_maximal(graph, F, 0, len(F) - 1)
+
+    @pytest.mark.parametrize('case', maxflow_cases)
+    def test_ford_fulkerson__predefined(self, case):
+        edges, gt_flow = case
+        graph = self.graph.from_edge_list(edges, directed=True, weighted=True)
+        mf, F = ford_fulkerson(graph)
+
+        assert gt_flow == mf
+        check_flow_is_correct(graph, F, 0, graph.order() - 1)
+        check_flow_is_maximal(graph, F, 0, graph.order() - 1)
+
+    @given(random_adj_mx())
+    def test_edmonds_karp__random(self, adj_mx):
+        graph = self.graph.from_adjacency_matrix(adj_mx, weighted=True, directed=True)
+        mf, F = edmonds_karp(graph)
+
+        start_flow = (F[0, :] > 0).sum()
+        event("MF > 0" if mf > 0 else "MF = 0")
+        event("start_flow = %d" % start_flow)
+
+        check_flow_is_correct(graph, F, 0, len(F) - 1)
+        check_flow_is_maximal(graph, F, 0, len(F) - 1)
+
+    @pytest.mark.parametrize('case', maxflow_cases)
+    def test_edmonds_karp__predefined(self, case):
+        edges, gt_flow = case
+        graph = self.graph.from_edge_list(edges, directed=True, weighted=True)
+        mf, F = edmonds_karp(graph)
+
+        assert gt_flow == mf
+        check_flow_is_correct(graph, F, 0, graph.order() - 1)
+        check_flow_is_maximal(graph, F, 0, graph.order() - 1)

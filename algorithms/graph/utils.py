@@ -220,6 +220,8 @@ def to_undirected(g: BaseGraph, min_weight=True):
         edges = {}
 
     for u in g:
+        if u not in g_new:
+            g_new.add_node(u)
         for v in g.successors(u):
             if g.weighted:
                 # chose max weight between (x,y) and (y,x)
@@ -244,6 +246,8 @@ def to_unweighted(g: BaseGraph):
     g_new = g.__class__(directed=g.directed, weighted=False)
 
     for u in g:
+        if u not in g_new:
+            g_new.add_node(u)
         for v in g.successors(u):
             if g.weighted:
                 g_new.add_edge(u, v[0])
