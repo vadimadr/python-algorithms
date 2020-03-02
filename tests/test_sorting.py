@@ -3,7 +3,6 @@ from unittest import TestCase
 import numpy as np
 
 from algorithms.sorting import *
-from algorithms.sorting.merge import merge_lists, merge_n_lists, merge_sort
 
 
 def is_sorted(seq, start=0, end=None):
@@ -90,6 +89,10 @@ class BaseBubbleSortTest(BaseSortTest):
 
 
 class BaseQSortTest(BaseSortTest):
+    sort_method = quick_sort
+
+
+class BaseIntroSortTest(BaseSortTest):
     sort_method = quick_sort
 
 
