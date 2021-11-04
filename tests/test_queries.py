@@ -1,5 +1,5 @@
 from hypothesis import assume, given
-from hypothesis.strategies import composite, lists, integers, tuples, permutations
+from hypothesis.strategies import composite, integers, lists, permutations, tuples
 
 from algorithms.structures.range_queries.fenwick_tree import FenwickTree
 from algorithms.structures.range_queries.sqrt_decomposition import SQRTDecomposition
@@ -14,7 +14,7 @@ def shuffle(draw, data):
 @composite
 def intervals(draw, arr_size):
     queries = draw(lists(integers(1, arr_size)))
-    return [('q', r) for r in queries]
+    return [("q", r) for r in queries]
 
 
 @composite
@@ -22,14 +22,14 @@ def ranges(draw, arr_size):
     idxs = integers(1, arr_size)
     data = tuples(idxs, idxs)
     queries = draw(lists(data))
-    return [('q', min(l, r), max(l, r)) for l, r in queries]
+    return [("q", min(l, r), max(l, r)) for l, r in queries]
 
 
 @composite
 def updates(draw, arr_size, data_range):
     idxs = integers(0, arr_size - 1)
     updates = draw(lists(tuples(idxs, data_range)))
-    return [('u', i, x) for i, x in updates]
+    return [("u", i, x) for i, x in updates]
 
 
 @composite
@@ -52,9 +52,9 @@ def test_fenwick(data):
     tree = FenwickTree(arr)
 
     for q in queries:
-        if q[0] == 'q':
-            assert sum(arr[:q[1]]) == tree.query(q[1])
-        if q[0] == 'u':
+        if q[0] == "q":
+            assert sum(arr[: q[1]]) == tree.query(q[1])
+        if q[0] == "u":
             arr[q[1]] += q[2]
             tree.update(q[1], q[2])
 
@@ -66,10 +66,10 @@ def test_sqrt_decompoisition(data):
     arr = arr.copy()
 
     for q in queries:
-        if q[0] == 'q':
+        if q[0] == "q":
             _, l, r = q
             assert sum(arr[l:r]) == struct.query(l, r)
-        if q[0] == 'u':
+        if q[0] == "u":
             _, i, x = q
             arr[i] += x
             struct.update(i, x)

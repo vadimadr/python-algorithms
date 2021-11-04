@@ -12,7 +12,7 @@ def newton_raphson_root(f, y, x0, df=None, maxiter=100, tol=1e-6):
         allowed tolerance
     """
     x = x0
-    xprev = 1.
+    xprev = 1.0
     i = 1
     err = abs(f(x) - y)
     while err > tol and i < maxiter:

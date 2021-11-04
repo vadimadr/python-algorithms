@@ -2,7 +2,7 @@ from unittest import TestCase
 
 import numpy as np
 
-from algorithms.sorting import *
+from algorithms.sorting import bubble_sort, heap_sort, insertion_sort, merge_lists, merge_n_lists, merge_sort, quick_sort, selection_sort
 
 
 def is_sorted(seq, start=0, end=None):
@@ -22,7 +22,6 @@ def sorting_wrapper(fn):
 
 
 class BaseSortTest(TestCase):
-
     def sort_method(a, l, r):
         a[:] = sorted(a)
 
@@ -109,7 +108,6 @@ class BaseHeapSortTest(BaseSortTest):
 
 
 class TestMerge(TestCase):
-
     def testEqual(self):
         xs = [1] * 10
         ys = [1] * 10
@@ -182,7 +180,6 @@ class TestMerge(TestCase):
 
 
 class TestMergeN(TestCase):
-
     def testRandom1(self):
         np.random.seed(456)
         nlists = np.random.randint(5, 32)

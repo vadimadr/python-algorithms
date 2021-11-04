@@ -2,7 +2,6 @@ from collections import deque
 
 
 class BaseTree:
-
     def __init__(self, parent=None, root=None, *args, **kwargs):
         self.parent = parent
         self.children = []

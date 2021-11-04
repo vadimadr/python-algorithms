@@ -1,7 +1,7 @@
 def bruteforce_substr(s, t, start, end):
     m = len(s)
     for i in range(start, end + 1):
-        if t[i: i + m] == s:
+        if t[i : i + m] == s:
             return i
     return -1
 
@@ -79,15 +79,15 @@ def prefix_hash(s, p, P=53):
 
     for i, c in enumerate(s):
         if c.islower():
-            code = ord(c) - ord('a')
+            code = ord(c) - ord("a")
         else:
-            code = ord(c) - ord('A')
+            code = ord(c) - ord("A")
         h[i] = h[i - 1] + (code + 1) * p[i]
     return h
 
 
 def robin_karp_substr(s, t, start, end, P=53):
-    if s == '':
+    if s == "":
         return 0
     t = t[start:end]
     p = []
@@ -144,7 +144,7 @@ def boyer_moore_substr(s, t, start, end):
     # create table for good suffix heuristic
     # Boyer–Moore–Horspool (simplified version of this) does not use it.
     p = prefix(s)
-    pr = prefix(''.join(reversed(s)))
+    pr = prefix("".join(reversed(s)))
     suffshift = [m - p[-1]] * m
     for i in range(m):
         j = m - pr[i] - 1

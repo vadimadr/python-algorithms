@@ -8,7 +8,7 @@ from algorithms.structures.heap import BinaryHeap
 
 from . import BaseGraph
 
-inf = float('inf')
+inf = float("inf")
 
 
 def dfs(g: BaseGraph, u):

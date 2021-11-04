@@ -1,5 +1,6 @@
-import numpy as np
 from operator import add
+
+import numpy as np
 
 
 class FenwickTree:
@@ -19,7 +20,8 @@ class FenwickTree:
     def __init__(self, arr, op=add, initial=0):
         self.initial = initial
         self.function = op
-        self.tree = np.full(len(arr) + 1, initial)  # use 1-based indexation for simplicity
+        # use 1-based indexation for simplicity
+        self.tree = np.full(len(arr) + 1, initial)
 
         for i in range(len(arr)):
             self.update(i, arr[i])

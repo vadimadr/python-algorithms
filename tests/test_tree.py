@@ -1,11 +1,11 @@
 from math import inf
 
-from hypothesis import given, assume, settings
-from hypothesis.strategies import integers, lists, composite, permutations, sets
+from hypothesis import assume, given
+from hypothesis.strategies import composite, integers, lists, permutations
 
 from algorithms.structures.tree.avl_tree import AVLTree
 from algorithms.structures.tree.binary_search_tree import BinarySearchTree
-from algorithms.structures.tree.red_black_tree import RedBlackTree, BLACK, RED
+from algorithms.structures.tree.red_black_tree import BLACK, RED, RedBlackTree
 
 
 def bst_invariant(t, min_key=-inf, max_key=inf, parent=None):
@@ -130,11 +130,14 @@ def test_bst_invariant_rotations(t, left):
         before_rotation = [n.key for n in node.breadth_first()]
         parent = node.parent
         node.rotate(bool(left))
-        assert bst_invariant(node, parent=parent), "Tree rotation must not break BST invariant"
+        assert bst_invariant(
+            node, parent=parent
+        ), "Tree rotation must not break BST invariant"
 
         node.rotate(not bool(left))
-        assert before_rotation == [n.key for n in node.breadth_first()], \
-            "Symmetric rotations should result in the same tree"
+        assert before_rotation == [
+            n.key for n in node.breadth_first()
+        ], "Symmetric rotations should result in the same tree"
 
 
 def test_left_rotate():
@@ -200,9 +203,13 @@ def insert_delete_queries(draw):
     insertions = draw(lists(integers()))
     insertions = list(set(insertions))
     assume(len(insertions) > 0)
-    n_deletions = draw(integers(min(len(insertions), len(insertions) // 2 + 1), len(insertions)))
+    n_deletions = draw(
+        integers(min(len(insertions), len(insertions) // 2 + 1), len(insertions))
+    )
     deletions = draw(permutations(insertions))[:n_deletions]
-    queries = [('i', x) for x in draw(permutations(insertions))] + [('d', x) for x in deletions]
+    queries = [("i", x) for x in draw(permutations(insertions))] + [
+        ("d", x) for x in deletions
+    ]
     return queries
 
 
@@ -211,7 +218,7 @@ def test_rb_queries(queries):
     tree = RedBlackTree(queries[0][1])
 
     for t, q in queries[1:]:
-        if t == 'i':
+        if t == "i":
             tree.add(q)
         else:
             tree.delete(q)
@@ -233,7 +240,7 @@ def test_avl_queries(queries):
     tree = AVLTree(queries[0][1])
 
     for t, q in queries[1:]:
-        if t == 'i':
+        if t == "i":
             tree.add(q)
         else:
             tree.delete(q)

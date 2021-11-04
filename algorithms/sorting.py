@@ -216,7 +216,7 @@ def merge_n(a, run):
     while nrun > 1:
         nrun = 1
         for k in range(1, nrun, 2):
-            lo, mid, hi = run[k - 1:k + 2]  # bounds
+            lo, mid, hi = run[k - 1 : k + 2]  # bounds
             p, q = lo, mid  # pointers to the next elements
             run[nrun] = hi
             nrun += 1

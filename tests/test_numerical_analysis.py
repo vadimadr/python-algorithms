@@ -1,4 +1,4 @@
-from math import cos, sin, exp
+from math import cos, exp, sin
 
 from algorithms.numerical_analysis import newton_raphson_root, ternary_search
 from tests.utils import float_eq
@@ -20,5 +20,5 @@ def test_optimization_ternary():
     f1 = lambda x: (x - 3) ** 2 + 2.4
     assert float_eq(ternary_search(f1, 0, 10), 3)
 
-    f2 = lambda x: exp(- (x - 1.5) ** 2)
+    f2 = lambda x: exp(-((x - 1.5) ** 2))
     assert float_eq(ternary_search(f2, -5, 5, min_=False), 1.5)

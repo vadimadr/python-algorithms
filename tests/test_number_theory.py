@@ -3,32 +3,40 @@ from functools import reduce
 from unittest import TestCase
 
 import pytest
-from hypothesis import given, assume
+from hypothesis import assume, given
 from hypothesis.strategies import integers
 
-from algorithms.number_theory import (binomial, euler_phi, even, factorize,
-                                      fibonacci, gcd, is_prime, odd, sieve, binpow, linear_diophantine,
-                                      extended_euclidian)
+from algorithms.number_theory import (
+    binomial,
+    binpow,
+    euler_phi,
+    even,
+    extended_euclidian,
+    factorize,
+    fibonacci,
+    gcd,
+    is_prime,
+    linear_diophantine,
+    odd,
+    sieve,
+)
 
 _dir = os.path.dirname(__file__)
 
 
 @pytest.fixture
 def primes():
-    with open(os.path.join(_dir, 'data/primes.dat')) as src:
+    with open(os.path.join(_dir, "data/primes.dat")) as src:
         return list(map(int, src))
 
 
 @pytest.fixture
 def nonprimes():
-    with open(os.path.join(_dir, 'data/notprimes.dat')) \
-            as \
-            src:
+    with open(os.path.join(_dir, "data/notprimes.dat")) as src:
         return list(map(int, src))
 
 
 class TestIs_prime:
-
     def test_is_prime(self, primes):
         for p in primes:
             assert is_prime(p), "Wrong result with p = %d" % p
@@ -39,7 +47,6 @@ class TestIs_prime:
 
 
 class TestFactor:
-
     def test_zero(self):
         assert factorize(0) == [(0, 1)]
 
@@ -65,15 +72,13 @@ class TestFactor:
 
 
 class TestSieve(TestCase):
-
     def test_sieve(self):
         self.assertEqual(sieve(2), [2])
         self.assertEqual(sieve(3), [2, 3])
         self.assertEqual(sieve(5), [2, 3, 5])
 
     def test_sieve2(self):
-        with open(os.path.join(_dir, 'data/primes.dat')) \
-                as src:
+        with open(os.path.join(_dir, "data/primes.dat")) as src:
             lines = src.readlines()
             primes = [int(n.strip()) for n in lines]
             maxp = primes[-1]
@@ -81,9 +86,10 @@ class TestSieve(TestCase):
             self.assertEqual(sieve_primes, primes)
 
 
-@pytest.mark.parametrize("a,b,expected", (
-        (20, 100, 20), (15, 0, 15), (13, 13, 13), (37, 600, 1),
-        (624129, 2061517, 18913)))
+@pytest.mark.parametrize(
+    "a,b,expected",
+    ((20, 100, 20), (15, 0, 15), (13, 13, 13), (37, 600, 1), (624129, 2061517, 18913)),
+)
 def test_gcd(a, b, expected):
     assert gcd(a, b) == expected
 

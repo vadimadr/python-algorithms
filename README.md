@@ -1,4 +1,7 @@
-[![Build Status](https://travis-ci.org/vadimadr/python-algorithms.svg?branch=master)](https://travis-ci.org/vadimadr/python-algorithms)
+[![Tests](https://github.com/vadimadr/python-algorithms/actions/workflows/tests.yml/badge.svg)](https://github.com/vadimadr/python-algorithms/actions/workflows/tests.yml)
+[![Lint](https://github.com/vadimadr/python-algorithms/actions/workflows/lint.yml/badge.svg)](https://github.com/vadimadr/python-algorithms/actions/workflows/lint.yml)
+[![codecov](https://codecov.io/gh/vadimadr/python-algorithms/branch/master/graph/badge.svg?token=YLNNG9GSTP)](https://codecov.io/gh/vadimadr/python-algorithms)
+
 
 Python algorithms
 =================
