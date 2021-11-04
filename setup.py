@@ -37,7 +37,6 @@ setup(
     author_email="vadimadr@gmail.com",
     description="Implementation of some common algorithms",
     zip_safe=False,
-    package_data={"": "LICENSE"},
     install_requires=requirements,
     tests_require=test_requirements,
     test_suite="tests",

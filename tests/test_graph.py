@@ -4,7 +4,7 @@ from operator import eq
 
 import numpy as np
 import pytest
-from hypothesis import event, given, settings
+from hypothesis import event, given
 from hypothesis.extra.numpy import arrays
 from hypothesis.strategies import composite, floats, integers
 from scipy.sparse import csgraph as scipy_graph

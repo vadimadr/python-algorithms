@@ -28,7 +28,6 @@ clean-test: ## remove test and coverage artifacts
 
 lint: ## check style with flake8
 	flake8 algorithms tests 
-	mypy algorithms tests 
 
 format:
 	autoflake -ir algorithms --exclude="algorithms/_extensions,submodules"

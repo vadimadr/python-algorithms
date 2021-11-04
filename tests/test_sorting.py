@@ -2,7 +2,7 @@ from unittest import TestCase
 
 import numpy as np
 
-from algorithms.sorting import *
+from algorithms.sorting import bubble_sort, heap_sort, insertion_sort, merge_lists, merge_n_lists, merge_sort, quick_sort, selection_sort
 
 
 def is_sorted(seq, start=0, end=None):

@@ -4,8 +4,8 @@ from math import gcd, hypot, inf, sqrt
 
 eps = 1e-14
 Line2 = namedtuple("Line2", ["a", "b", "c"])
-vec3_base = namedtuple("Vec3", ["x", "y", "z"])
-vec2_base = namedtuple("Vec2", ["x", "y"])
+vec3_base = namedtuple("vec3_base", ["x", "y", "z"])
+vec2_base = namedtuple("vec2_base", ["x", "y"])
 
 
 class Vec2(vec2_base):

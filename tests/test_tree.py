@@ -1,7 +1,7 @@
 from math import inf
 
-from hypothesis import assume, given, settings
-from hypothesis.strategies import composite, integers, lists, permutations, sets
+from hypothesis import assume, given
+from hypothesis.strategies import composite, integers, lists, permutations
 
 from algorithms.structures.tree.avl_tree import AVLTree
 from algorithms.structures.tree.binary_search_tree import BinarySearchTree
