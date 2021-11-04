@@ -4,7 +4,7 @@ flake8==3.7.8
 hypothesis==6.24.1
 isort==5.9.1
 mypy==0.910
-numpy>=1.21.0
+numpy>=1.19.0
 pip>=19.2.3
 pytest-cov==2.10.1
 pytest-mock==3.6.1
