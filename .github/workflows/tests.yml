@@ -3,13 +3,15 @@ name: Tests
 on: [push, pull_request]
 
 jobs:
-  build:
+  test:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     strategy:
       fail-fast: false
       matrix:
         python-version: [3.6, 3.7, 3.8]
+      env:
+        PYTHON: ${{ matrix.python-version }}
 
     steps:
       - uses: actions/checkout@v2
@@ -23,4 +25,12 @@ jobs:
           make develop
       - name: Run tests
         run: |
-          make test
+          make coverage
+      - name: Upload coverage report to codecov.io
+        uses: codecov/codecov-action@v2
+        with:
+          files: ./coverage.xml
+          flags: unittest
+          env: PYTHON
+          fail_ci_if_error: true
+          verbose: true
