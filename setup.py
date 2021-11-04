@@ -18,9 +18,10 @@ class PyTest(TestCommand):
         sys.exit(errno)
 
 
-requirements = ["numpy", "scipy", "matplotlib"]
+with open("requirements-dev.txt", "r") as f:
+    dev_requirements = f.read().strip().splitlines()
 
-test_requirements = [
+dev_requirements = [
     "pytest",
     "pytest-cov",
     "pytest-mock",
@@ -37,8 +38,7 @@ setup(
     author_email="vadimadr@gmail.com",
     description="Implementation of some common algorithms",
     zip_safe=False,
-    install_requires=requirements,
-    tests_require=test_requirements,
+    tests_require=dev_requirements,
     test_suite="tests",
     cmdclass={"test": PyTest},
 )
