@@ -25,7 +25,7 @@ jobs:
           make develop
       - name: Run tests
         run: |
-          make coverage
+          make coverage-report
       - name: Upload coverage report to codecov.io
         uses: codecov/codecov-action@v2
         with:
