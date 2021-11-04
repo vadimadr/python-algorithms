@@ -42,15 +42,15 @@ def is_connected(g: Graph, start=0):
 
 def topological_sort(g: Graph):
     """Reorder nodes of acyclic oriented graph, in the way that
-     for any edge (u, w): u < w
+    for any edge (u, w): u < w
 
-     Topological order is not unique
+    Topological order is not unique
 
-     Returns
-     --------
-     t
-        t[i] is the ith node in topological order
-     """
+    Returns
+    --------
+    t
+       t[i] is the ith node in topological order
+    """
     t = []
     n = g.order()
     c = [0] * n

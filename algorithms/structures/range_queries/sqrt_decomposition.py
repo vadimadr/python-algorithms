@@ -17,7 +17,9 @@ class SQRTDecomposition:
         self.arr = arr
 
         for i in range(len(arr)):
-            self.blocks[i // self.block_size] = op(self.blocks[i // self.block_size], arr[i])
+            self.blocks[i // self.block_size] = op(
+                self.blocks[i // self.block_size], arr[i]
+            )
 
     def query(self, l, r):
         ans = self.initial
@@ -47,4 +49,6 @@ class SQRTDecomposition:
 
     def update(self, i, x):
         self.arr[i] = self.function(self.arr[i], x)
-        self.blocks[i // self.block_size] = self.function(self.blocks[i // self.block_size], x)
+        self.blocks[i // self.block_size] = self.function(
+            self.blocks[i // self.block_size], x
+        )

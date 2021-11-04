@@ -11,11 +11,16 @@ def is_heap(heap):
 
     for i in range(n):
         left_child = i * 2 + 1
-        if left_child < n and (not maxheap and a[left_child] < a[i] or
-                               maxheap and a[i] < a[left_child]):
+        if left_child < n and (
+            not maxheap and a[left_child] < a[i] or maxheap and a[i] < a[left_child]
+        ):
             return False
-        if left_child + 1 < n and (not maxheap and (a[left_child + 1] < a[i])
-                                   or maxheap and a[i] < a[left_child + 1]):
+        if left_child + 1 < n and (
+            not maxheap
+            and (a[left_child + 1] < a[i])
+            or maxheap
+            and a[i] < a[left_child + 1]
+        ):
             return False
     return True
 
@@ -32,7 +37,7 @@ def test_heapify_max(data):
     assert is_heap(heap)
 
 
-@given(lists(integers(), 1))
+@given(lists(integers(), min_size=1))
 def test_heap_pop(data):
     heap = BinaryHeap(data)
     assert is_heap(heap)
@@ -42,7 +47,7 @@ def test_heap_pop(data):
     assert heap_pop == data_min
 
 
-@given(lists(integers(), 1))
+@given(lists(integers(), min_size=1))
 def test_heap_pop_max(data):
     heap = BinaryHeap(data, maxheap=True)
     data_max = max(data)
@@ -51,7 +56,7 @@ def test_heap_pop_max(data):
     assert heap_pop == data_max
 
 
-@given(lists(integers(), 1), integers(0), integers())
+@given(lists(integers(), min_size=1), integers(0), integers())
 def test_heap_replace(data, i, newval):
     heap = BinaryHeap(data)
     i %= len(data)
@@ -59,7 +64,7 @@ def test_heap_replace(data, i, newval):
     assert is_heap(heap)
 
 
-@given(lists(integers(), 1), lists(integers(), 1))
+@given(lists(integers(), min_size=1), lists(integers(), min_size=1))
 def test_merge_heaps(data1, data2):
     heap1 = BinaryHeap(data1)
     heap2 = BinaryHeap(data2)
@@ -67,7 +72,7 @@ def test_merge_heaps(data1, data2):
     assert is_heap(heap1)
 
 
-@given(lists(integers(), 1), integers(0))
+@given(lists(integers(), min_size=1), integers(0))
 def test_kth_element(data, i):
     heap = BinaryHeap(data)
     i %= len(data)

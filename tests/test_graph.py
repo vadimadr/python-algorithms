@@ -4,38 +4,81 @@ from operator import eq
 
 import numpy as np
 import pytest
-from hypothesis import given, event, settings
+from hypothesis import event, given, settings
 from hypothesis.extra.numpy import arrays
-from hypothesis.strategies import composite, integers, floats
+from hypothesis.strategies import composite, floats, integers
 from scipy.sparse import csgraph as scipy_graph
 
-from algorithms.graph import (AdjMxGraph, AdjSetGraph, EdgeListGraph,
-                              is_complete_graph, subgraph, to_adjacency_list,
-                              to_adjacency_matrix, to_edge_list, to_undirected)
-from algorithms.graph.maxflow import ford_fulkerson, edmonds_karp
-from algorithms.graph.problems import (euler_graph_test, euler_path,
-                                       find_cycle, is_connected,
-                                       topological_sort)
-from algorithms.graph.searching import (bellman_ford_search, bfs, bfs_iter,
-                                        dfs_iter, dijkstra_search,
-                                        floyd_warshall_search, kruskal_mst,
-                                        restore_path, prim_mst)
-from algorithms.graph.utils import (normalize_adjacency_dict,
-                                    normalize_edge_list)
+from algorithms.graph import (
+    AdjMxGraph,
+    AdjSetGraph,
+    EdgeListGraph,
+    is_complete_graph,
+    subgraph,
+    to_adjacency_list,
+    to_adjacency_matrix,
+    to_edge_list,
+    to_undirected,
+)
+from algorithms.graph.maxflow import edmonds_karp, ford_fulkerson
+from algorithms.graph.problems import (
+    euler_graph_test,
+    euler_path,
+    find_cycle,
+    is_connected,
+    topological_sort,
+)
+from algorithms.graph.searching import (
+    bellman_ford_search,
+    bfs,
+    bfs_iter,
+    dfs_iter,
+    dijkstra_search,
+    floyd_warshall_search,
+    kruskal_mst,
+    prim_mst,
+    restore_path,
+)
+from algorithms.graph.utils import normalize_adjacency_dict, normalize_edge_list
 
-k5 = [(0, 1), (0, 2), (0, 3), (0, 4), (1, 2), (1, 3), (1, 4), (2, 3), (2, 4),
-      (3, 4)]
-k7 = [(0, 1), (0, 2), (0, 3), (0, 4), (0, 5), (0, 6), (1, 2), (1, 3), (1, 4),
-      (1, 5), (1, 6), (2, 3), (2, 4), (2, 5), (2, 6), (3, 4), (3, 5), (3, 6),
-      (4, 5), (4, 6), (5, 6)]
+k5 = [(0, 1), (0, 2), (0, 3), (0, 4), (1, 2), (1, 3), (1, 4), (2, 3), (2, 4), (3, 4)]
+k7 = [
+    (0, 1),
+    (0, 2),
+    (0, 3),
+    (0, 4),
+    (0, 5),
+    (0, 6),
+    (1, 2),
+    (1, 3),
+    (1, 4),
+    (1, 5),
+    (1, 6),
+    (2, 3),
+    (2, 4),
+    (2, 5),
+    (2, 6),
+    (3, 4),
+    (3, 5),
+    (3, 6),
+    (4, 5),
+    (4, 6),
+    (5, 6),
+]
 
 # complete bipariate graph
 k3_3 = [(0, 3), (0, 4), (0, 5), (1, 3), (1, 4), (1, 5), (2, 3), (2, 4), (2, 5)]
 
-k4_4m = [[0, 0, 0, 0, 1, 1, 1, 1], [0, 0, 0, 0, 1, 1, 1, 1],
-         [0, 0, 0, 0, 1, 1, 1, 1], [0, 0, 0, 0, 1, 1, 1, 1],
-         [1, 1, 1, 1, 0, 0, 0, 0], [1, 1, 1, 1, 0, 0, 0, 0],
-         [1, 1, 1, 1, 0, 0, 0, 0], [1, 1, 1, 1, 0, 0, 0, 0]]
+k4_4m = [
+    [0, 0, 0, 0, 1, 1, 1, 1],
+    [0, 0, 0, 0, 1, 1, 1, 1],
+    [0, 0, 0, 0, 1, 1, 1, 1],
+    [0, 0, 0, 0, 1, 1, 1, 1],
+    [1, 1, 1, 1, 0, 0, 0, 0],
+    [1, 1, 1, 1, 0, 0, 0, 0],
+    [1, 1, 1, 1, 0, 0, 0, 0],
+    [1, 1, 1, 1, 0, 0, 0, 0],
+]
 
 # star graph
 s6 = [(0, 1), (0, 2), (0, 3), (0, 4), (0, 5)]
@@ -57,7 +100,7 @@ def check_path(g, d, p, d_true):
         for j in range(n):
             dist = 0
             u, v = p[i][j], j
-            if u == - 1 and i != j:
+            if u == -1 and i != j:
                 dist = np.inf
             while u != -1:
                 dist += g.distance(u, v)
@@ -77,15 +120,17 @@ def check_mst(origin_graph, mst_graph, mst_list, reference_mst_mx):
     assert abs(w0 - w) < 1e-6
 
 
-@pytest.fixture(scope="class", params=[AdjMxGraph, AdjSetGraph, EdgeListGraph],
-                ids=["Matrix", "Set", "Edge List"])
+@pytest.fixture(
+    scope="class",
+    params=[AdjMxGraph, AdjSetGraph, EdgeListGraph],
+    ids=["Matrix", "Set", "Edge List"],
+)
 def graph_cls(request):
     request.cls.graph = request.param
 
 
 @pytest.mark.usefixtures("graph_cls")
 class TestGraphBasics:
-
     def testk5(self):
         g = self.graph.from_edge_list(k5)
         for i in range(5):
@@ -211,7 +256,7 @@ class TestGraphBasics:
 
 
 def test_normalize_edge_list():
-    e1 = [('a', 'b'), ('b', 'c'), ('c', 'a')]
+    e1 = [("a", "b"), ("b", "c"), ("c", "a")]
     e2 = [(1, 2, 0.3), (2, 5, 0.6), (1, 3, 2.5), (3, 5, 0.1)]
 
     e1_, _ = normalize_edge_list(e1)
@@ -227,7 +272,7 @@ def test_normalize_edge_list():
 
 
 def test_normalize_adj_dict():
-    d1 = {'a': ['b', 'c', 'd'], 'b': ['a', 'c'], 'd': ['a']}
+    d1 = {"a": ["b", "c", "d"], "b": ["a", "c"], "d": ["a"]}
 
     d1_, _ = normalize_adjacency_dict(d1)
 
@@ -236,13 +281,19 @@ def test_normalize_adj_dict():
 
 @pytest.mark.usefixtures("graph_cls")
 class TestGraphUtils:
-
     def test_to_adjmx(self):
         g = self.graph.from_edge_list(k3_3)
         m = np.array(
-            [[0, 0, 0, 1, 1, 1], [0, 0, 0, 1, 1, 1], [0, 0, 0, 1, 1, 1],
-             [1, 1, 1, 0, 0, 0], [1, 1, 1, 0, 0, 0], [1, 1, 1, 0, 0, 0]],
-            dtype=float)
+            [
+                [0, 0, 0, 1, 1, 1],
+                [0, 0, 0, 1, 1, 1],
+                [0, 0, 0, 1, 1, 1],
+                [1, 1, 1, 0, 0, 0],
+                [1, 1, 1, 0, 0, 0],
+                [1, 1, 1, 0, 0, 0],
+            ],
+            dtype=float,
+        )
 
         assert (m == to_adjacency_matrix(g)).all()
 
@@ -256,8 +307,7 @@ class TestGraphUtils:
     def test_to_edgelist(self):
         g = self.graph.from_edge_list(k3_3)
 
-        l = [(0, 3), (0, 4), (0, 5), (1, 3), (1, 4), (1, 5), (2, 3), (2, 4),
-             (2, 5)]
+        l = [(0, 3), (0, 4), (0, 5), (1, 3), (1, 4), (1, 5), (2, 3), (2, 4), (2, 5)]
 
         assert sorted(l) == sorted(to_edge_list(g))
 
@@ -283,8 +333,7 @@ class TestGraphUtils:
         g = self.graph.from_edge_list(k3_3, directed=True)
         g2 = to_undirected(g)
 
-        l = [(0, 3), (0, 4), (0, 5), (1, 3), (1, 4), (1, 5), (2, 3), (2, 4),
-             (2, 5)]
+        l = [(0, 3), (0, 4), (0, 5), (1, 3), (1, 4), (1, 5), (2, 3), (2, 4), (2, 5)]
 
         assert l == to_edge_list(g2)
 
@@ -294,34 +343,57 @@ shortest_path_directed1 = [
     [0, 0, 0, 2, 4],
     [0, 0, 0, 0, 0],
     [1, 0, 0, 0, 0],
-    [2, 0, 0, 2, 0]]
+    [2, 0, 0, 2, 0],
+]
 
 shortest_path_undirected1 = [
     [0, 3, 3, 1, 2],
     [3, 0, 0, 2, 4],
     [3, 0, 0, 0, 0],
     [1, 2, 0, 0, 2],
-    [2, 4, 0, 2, 0]]
+    [2, 4, 0, 2, 0],
+]
 
-graph_mst = [(0, 1, 9), (0, 3, 3), (0, 2, 6), (1, 3, 9), (1, 5, 8), (1, 9, 18),
-             (2, 3, 4), (2, 4, 2), (2, 6, 9), (3, 4, 2), (3, 5, 9), (4, 6, 9),
-             (4, 5, 8),
-             (5, 6, 7), (5, 8, 9),
-             (5, 9, 10), (6, 7, 4), (6, 8, 5), (7, 8, 1), (7, 9, 4), (8, 9, 3)]
+graph_mst = [
+    (0, 1, 9),
+    (0, 3, 3),
+    (0, 2, 6),
+    (1, 3, 9),
+    (1, 5, 8),
+    (1, 9, 18),
+    (2, 3, 4),
+    (2, 4, 2),
+    (2, 6, 9),
+    (3, 4, 2),
+    (3, 5, 9),
+    (4, 6, 9),
+    (4, 5, 8),
+    (5, 6, 7),
+    (5, 8, 9),
+    (5, 9, 10),
+    (6, 7, 4),
+    (6, 8, 5),
+    (7, 8, 1),
+    (7, 9, 4),
+    (8, 9, 3),
+]
 
 
 @pytest.mark.usefixtures("graph_cls")
 class TestSearch:
-
     def test_dfs_iter(self):
         path1 = [0, 1, 2, 3, 4]  # expected dfs order
         path2 = [0, 1, 4, 3, 2]
 
-        graph = np.array([[0, 1, 2, 0, 0],
-                          [1, 0, 0, 0, 3],
-                          [2, 0, 0, 7, 0],
-                          [0, 0, 7, 0, 1],
-                          [0, 3, 0, 1, 0]])
+        graph = np.array(
+            [
+                [0, 1, 2, 0, 0],
+                [1, 0, 0, 0, 3],
+                [2, 0, 0, 7, 0],
+                [0, 0, 7, 0, 1],
+                [0, 3, 0, 1, 0],
+            ]
+        )
 
         for directed, preorder in product([True, False], [True, False]):
             g1 = self.graph.from_edge_list(c5, directed=directed)
@@ -336,11 +408,15 @@ class TestSearch:
             assert all(map(eq, dfs2, path2_))
 
     def test_bfs_iter(self):
-        graph = np.array([[0, 1, 2, 0, 0],
-                          [1, 0, 0, 0, 3],
-                          [2, 0, 0, 7, 0],
-                          [0, 0, 7, 0, 1],
-                          [0, 3, 0, 1, 0]])
+        graph = np.array(
+            [
+                [0, 1, 2, 0, 0],
+                [1, 0, 0, 0, 3],
+                [2, 0, 0, 7, 0],
+                [0, 0, 7, 0, 1],
+                [0, 3, 0, 1, 0],
+            ]
+        )
 
         path1 = [0, 1, 4, 2, 3]  # c5, undir
         path2 = [0, 1, 2, 3, 4]  # c5, dir
@@ -372,16 +448,21 @@ class TestSearch:
                 assert p == [-1, 0, 1, 4, 0]
                 assert d == [0, 1, 2, 2, 1]
 
-    @pytest.mark.parametrize('G', [shortest_path_directed1])
-    @pytest.mark.parametrize('method,one', [
-        (dijkstra_search, True),
-        (bellman_ford_search, True),
-        (floyd_warshall_search, False),
-    ], ids=['Dijkstra', 'Bellman-Ford', 'Floyd-Warshall'])
+    @pytest.mark.parametrize("G", [shortest_path_directed1])
+    @pytest.mark.parametrize(
+        "method,one",
+        [
+            (dijkstra_search, True),
+            (bellman_ford_search, True),
+            (floyd_warshall_search, False),
+        ],
+        ids=["Dijkstra", "Bellman-Ford", "Floyd-Warshall"],
+    )
     def test_shortest_path_directed(self, method, one, G):
         graph_mx_ = np.array(G, dtype=float)
-        graph_ = self.graph.from_adjacency_matrix(graph_mx_, directed=True,
-                                                  weighted=True)
+        graph_ = self.graph.from_adjacency_matrix(
+            graph_mx_, directed=True, weighted=True
+        )
         if one:
             P = []
             D = []
@@ -395,16 +476,21 @@ class TestSearch:
         D_ = scipy_graph.shortest_path(graph_mx_, directed=graph_.directed)
         check_path(graph_, D, P, D_)
 
-    @pytest.mark.parametrize('G', [shortest_path_undirected1])
-    @pytest.mark.parametrize('method,one', [
-        (dijkstra_search, True),
-        (bellman_ford_search, True),
-        (floyd_warshall_search, False),
-    ], ids=['Dijkstra', 'Bellman-Ford', 'Floyd-Warshall'])
+    @pytest.mark.parametrize("G", [shortest_path_undirected1])
+    @pytest.mark.parametrize(
+        "method,one",
+        [
+            (dijkstra_search, True),
+            (bellman_ford_search, True),
+            (floyd_warshall_search, False),
+        ],
+        ids=["Dijkstra", "Bellman-Ford", "Floyd-Warshall"],
+    )
     def test_shortest_path_undirected(self, method, one, G):
         graph_mx_ = np.array(G, dtype=float)
-        graph_ = self.graph.from_adjacency_matrix(graph_mx_, directed=False,
-                                                  weighted=True)
+        graph_ = self.graph.from_adjacency_matrix(
+            graph_mx_, directed=False, weighted=True
+        )
         if one:
             P = []
             D = []
@@ -440,8 +526,19 @@ class TestSearch:
         assert not topological_sort(g2)
 
     def test_euler_graph(self):
-        g1_ = [(0, 1), (0, 2), (1, 3), (1, 5), (2, 1), (2, 3), (3, 0), (3, 4),
-               (4, 0), (4, 2), (5, 4)]
+        g1_ = [
+            (0, 1),
+            (0, 2),
+            (1, 3),
+            (1, 5),
+            (2, 1),
+            (2, 3),
+            (3, 0),
+            (3, 4),
+            (4, 0),
+            (4, 2),
+            (5, 4),
+        ]
         g2_ = [(0, 1), (1, 2), (2, 0), (3, 4), (4, 5), (5, 3)]  # two triangles
         g3_ = [(0, 3), (0, 4), (3, 1), (3, 2), (1, 2), (2, 0), (4, 1)]
 
@@ -462,8 +559,9 @@ class TestSearch:
             for w, u in zip(p, p[1:]):
                 assert g1_copy.has_edge(w, u)
 
-    @pytest.mark.parametrize('mst_algo', [kruskal_mst, prim_mst],
-                             ids=['Kruskal', 'Prim'])
+    @pytest.mark.parametrize(
+        "mst_algo", [kruskal_mst, prim_mst], ids=["Kruskal", "Prim"]
+    )
     def test_mst(self, mst_algo):
         g = self.graph.from_edge_list(graph_mst, weighted=True, directed=False)
         mx = to_adjacency_matrix(g)
@@ -480,7 +578,7 @@ def random_adj_mx(draw):
     prob = draw(floats(0, 1))
     caps = integers(0, 100)
     n = draw(integers(2, 30))
-    adj_mx = draw(arrays(np.int, (n, n), caps))
+    adj_mx = draw(arrays(np.int, (n, n), elements=caps))
 
     rg = np.random.RandomState(seed)
     mask = rg.binomial(1, prob, (n, n))
@@ -515,12 +613,68 @@ def check_flow_is_maximal(graph, flow, s, t):
 
 
 maxflow_cases = [
-    ([(0, 1, 7), (0, 3, 4), (1, 2, 5), (1, 4, 3), (2, 5, 8), (3, 1, 3), (3, 4, 2), (4, 2, 3), (4, 5, 5)], 10),
-    ([(0, 1, 3), (0, 3, 3), (1, 2, 3), (1, 3, 2), (2, 4, 4), (3, 4, 2), (3, 5, 2), (4, 5, 3)], 5),
-    ([(0, 1, 2), (1, 0, 2), (1, 4, 5), (4, 1, 5), (0, 2, 6), (2, 0, 6), (2, 3, 2), (3, 2, 2), (3, 4, 1), (4, 3, 1),
-      (2, 1, 3), (1, 2, 3), (1, 3, 1), (3, 1, 1)], 6),
-    ([(0, 1, 1), (0, 2, 1), (0, 3, 1), (1, 4, 1), (1, 5, 1), (2, 5, 1), (2, 6, 1), (3, 6, 1), (4, 7, 1), (5, 7, 1),
-      (6, 7, 1)], 3),
+    (
+        [
+            (0, 1, 7),
+            (0, 3, 4),
+            (1, 2, 5),
+            (1, 4, 3),
+            (2, 5, 8),
+            (3, 1, 3),
+            (3, 4, 2),
+            (4, 2, 3),
+            (4, 5, 5),
+        ],
+        10,
+    ),
+    (
+        [
+            (0, 1, 3),
+            (0, 3, 3),
+            (1, 2, 3),
+            (1, 3, 2),
+            (2, 4, 4),
+            (3, 4, 2),
+            (3, 5, 2),
+            (4, 5, 3),
+        ],
+        5,
+    ),
+    (
+        [
+            (0, 1, 2),
+            (1, 0, 2),
+            (1, 4, 5),
+            (4, 1, 5),
+            (0, 2, 6),
+            (2, 0, 6),
+            (2, 3, 2),
+            (3, 2, 2),
+            (3, 4, 1),
+            (4, 3, 1),
+            (2, 1, 3),
+            (1, 2, 3),
+            (1, 3, 1),
+            (3, 1, 1),
+        ],
+        6,
+    ),
+    (
+        [
+            (0, 1, 1),
+            (0, 2, 1),
+            (0, 3, 1),
+            (1, 4, 1),
+            (1, 5, 1),
+            (2, 5, 1),
+            (2, 6, 1),
+            (3, 6, 1),
+            (4, 7, 1),
+            (5, 7, 1),
+            (6, 7, 1),
+        ],
+        3,
+    ),
     ([(0, 1, 2), (0, 2, 1), (1, 3, 2), (2, 3, 1)], 3),
     ([(0, 1, 1), (0, 2, 2), (1, 3, 1), (2, 3, 2)], 3),
     ([(0, 1, 2), (0, 2, 2), (1, 3, 1), (2, 3, 2), (1, 2, 1)], 3),
@@ -545,7 +699,7 @@ class TestMaxFlow:
         check_flow_is_correct(graph, F, 0, len(F) - 1)
         check_flow_is_maximal(graph, F, 0, len(F) - 1)
 
-    @pytest.mark.parametrize('case', maxflow_cases)
+    @pytest.mark.parametrize("case", maxflow_cases)
     def test_ford_fulkerson__predefined(self, case):
         edges, gt_flow = case
         graph = self.graph.from_edge_list(edges, directed=True, weighted=True)
@@ -567,7 +721,7 @@ class TestMaxFlow:
         check_flow_is_correct(graph, F, 0, len(F) - 1)
         check_flow_is_maximal(graph, F, 0, len(F) - 1)
 
-    @pytest.mark.parametrize('case', maxflow_cases)
+    @pytest.mark.parametrize("case", maxflow_cases)
     def test_edmonds_karp__predefined(self, case):
         edges, gt_flow = case
         graph = self.graph.from_edge_list(edges, directed=True, weighted=True)

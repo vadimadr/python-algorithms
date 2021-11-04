@@ -3,9 +3,9 @@ from collections import deque, namedtuple
 from math import gcd, hypot, inf, sqrt
 
 eps = 1e-14
-Line2 = namedtuple('Line2', ['a', 'b', 'c'])
-vec3_base = namedtuple('Vec3', ['x', 'y', 'z'])
-vec2_base = namedtuple('Vec2', ['x', 'y'])
+Line2 = namedtuple("Line2", ["a", "b", "c"])
+vec3_base = namedtuple("Vec3", ["x", "y", "z"])
+vec2_base = namedtuple("Vec2", ["x", "y"])
 
 
 class Vec2(vec2_base):
@@ -21,19 +21,13 @@ class Vec2(vec2_base):
 
 class Vec3(vec3_base):
     def __add__(self, other):
-        return Vec3(self.x + other.x,
-                    self.y + other.y,
-                    self.z + other.z)
+        return Vec3(self.x + other.x, self.y + other.y, self.z + other.z)
 
     def __sub__(self, other):
-        return Vec3(self.x - other.x,
-                    self.y - other.y,
-                    self.z - other.z)
+        return Vec3(self.x - other.x, self.y - other.y, self.z - other.z)
 
     def __mul__(self, other):
-        return Vec3(self.x * other,
-                    self.y * other,
-                    self.z * other)
+        return Vec3(self.x * other, self.y * other, self.z * other)
 
 
 def det2(a, b, c, d):
@@ -98,15 +92,17 @@ def orientation(a, b, c):
         # 2d space. Let z = 1, then apply Laplace expansion to first row
         return a.x * (b.y - c.y) + b.x * (c.y - a.y) + c.x * (a.y - b.y)
 
-    return a.x * b.y * c.z \
-        + a.y * b.z * c.x \
-        + a.z * b.x * c.y \
-        - a.x * b.z * c.y \
-        - a.y * b.x * c.z \
+    return (
+        a.x * b.y * c.z
+        + a.y * b.z * c.x
+        + a.z * b.x * c.y
+        - a.x * b.z * c.y
+        - a.y * b.x * c.z
         - a.z * b.y * c.x
+    )
 
 
-def line(p: Vec2, q: Vec2, normed='unit'):
+def line(p: Vec2, q: Vec2, normed="unit"):
     """Find line equation for ax + by + c = 0, through given points p and q"""
     # Solve [p - q, x] == 0
     a = q.y - p.y
@@ -115,12 +111,12 @@ def line(p: Vec2, q: Vec2, normed='unit'):
 
     if normed is None:
         return a, b, c
-    if normed == 'unit':
+    if normed == "unit":
         # unit length normal vector
         z = sqrt(a * a + b * b)
         if abs(z) > eps:
             a, b, c = a / z, b / z, c / z
-    if normed == 'gcd':
+    if normed == "gcd":
         # if p and q are integers, then a, b, c are integers
         z = gcd(gcd(a, b), c)
         if z != 0:
@@ -177,9 +173,11 @@ def line_same(l1: Line2, l2: Line2):
     a2, b2, c2 = l2
 
     # a, b, c are proportional iff all dets are equal to zero
-    c_ = abs(det2(a1, b1, a2, b2)) < eps and \
-        abs(det2(a1, c1, a2, c2)) < eps and \
-        abs(det2(b1, c1, b2, c2)) < eps
+    c_ = (
+        abs(det2(a1, b1, a2, b2)) < eps
+        and abs(det2(a1, c1, a2, c2)) < eps
+        and abs(det2(b1, c1, b2, c2)) < eps
+    )
 
     return c_
 
@@ -226,8 +224,9 @@ def segment_intersection(a: Vec2, b: Vec2, c: Vec2, d: Vec2):
     l2 = line(c, d)
 
     # check if one of segments is a point
-    point_test = all(map(lambda x: abs(x) < eps, l1)) or \
-        all(map(lambda x: abs(x) < eps, l2))
+    point_test = all(map(lambda x: abs(x) < eps, l1)) or all(
+        map(lambda x: abs(x) < eps, l2)
+    )
 
     if line_parallel(l1, l2):
         if not line_same(l1, l2):
@@ -242,10 +241,12 @@ def segment_intersection(a: Vec2, b: Vec2, c: Vec2, d: Vec2):
     else:
         p = line_intersect(l1, l2)
         # check if intersection point is inside segment
-        c_ = in_range(a.x, b.x, p.x) and \
-            in_range(a.y, b.y, p.y) and \
-            in_range(c.x, d.x, p.x) and \
-            in_range(c.y, d.y, p.y)
+        c_ = (
+            in_range(a.x, b.x, p.x)
+            and in_range(a.y, b.y, p.y)
+            and in_range(c.x, d.x, p.x)
+            and in_range(c.y, d.y, p.y)
+        )
 
         return p if c_ else False
 
@@ -484,7 +485,7 @@ def convex_hull(pts):
 
 def angle_cmp(a: Vec2, b: Vec2, origin=None):
     """Test whether polar angle or a less than polar angle of b. Does not
-    distinguish collinear points. """
+    distinguish collinear points."""
     if origin:
         a = a - origin
         b = b - origin
@@ -516,8 +517,10 @@ def point_inside_convex_polygon(poly, p):
         return False
 
     # Check if point lies on first or last edge. For strictly inside only.
-    if abs(orientation(first, poly[1], p)) < eps or \
-            abs(orientation(first, poly[-1], p)) < eps:
+    if (
+        abs(orientation(first, poly[1], p)) < eps
+        or abs(orientation(first, poly[-1], p)) < eps
+    ):
         return False
 
     angle_comparable = [AngleComparator(p, origin=first) for p in poly]

@@ -22,7 +22,6 @@ def sorting_wrapper(fn):
 
 
 class BaseSortTest(TestCase):
-
     def sort_method(a, l, r):
         a[:] = sorted(a)
 
@@ -109,7 +108,6 @@ class BaseHeapSortTest(BaseSortTest):
 
 
 class TestMerge(TestCase):
-
     def testEqual(self):
         xs = [1] * 10
         ys = [1] * 10
@@ -182,7 +180,6 @@ class TestMerge(TestCase):
 
 
 class TestMergeN(TestCase):
-
     def testRandom1(self):
         np.random.seed(456)
         nlists = np.random.randint(5, 32)

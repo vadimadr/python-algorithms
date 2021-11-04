@@ -40,7 +40,7 @@ class Benchmark(ABC):
 
 
 def time_range(bench, n0, n1, num=50, **kwargs):
-    """Returns (n, t) for n in [n0, n1) """
+    """Returns (n, t) for n in [n0, n1)"""
     ns = np.linspace(n0, n1, num, dtype=int)
     ys = []
     for n in ns:
@@ -58,7 +58,7 @@ def time_dist(bench, n, num=100, **kwargs):
 
 
 def fit_theta(ns, ys, th):
-    """fit (n, t) to c * Theta(n) """
+    """fit (n, t) to c * Theta(n)"""
     ns = np.array(ns)
     popt, pcov = curve_fit(th, ns, ys, 1)
     c = popt[0]
@@ -68,12 +68,12 @@ def fit_theta(ns, ys, th):
 
 
 T_ = {
-    'lin': lambda n, c: c * n,
-    'n^2': lambda n, c: c * n ** 2,
-    'n^3': lambda n, c: c * n ** 3,
-    'n*logn': lambda n, c: c * n * np.log(n),
-    'n^2*logn': lambda n, c: c * (n**2) * np.log(n),
-    'n*(logn)^2': lambda n, c: c * n * (np.log(n) **2),
+    "lin": lambda n, c: c * n,
+    "n^2": lambda n, c: c * n ** 2,
+    "n^3": lambda n, c: c * n ** 3,
+    "n*logn": lambda n, c: c * n * np.log(n),
+    "n^2*logn": lambda n, c: c * (n ** 2) * np.log(n),
+    "n*(logn)^2": lambda n, c: c * n * (np.log(n) ** 2),
 }
 
 
@@ -152,14 +152,14 @@ def theta_est(th):
 
 
 def visualize_range_bench(ns, ys, label=None):
-    pyplot.scatter(ns, ys, alpha=.7, label=label)
+    pyplot.scatter(ns, ys, alpha=0.7, label=label)
 
     best, ts = guess_theta(ns, ys)
     est = theta_est((best, ts))
 
-    pyplot.plot(ns, est(ns), '--')
-    pyplot.xlabel('n')
-    pyplot.ylabel('time')
+    pyplot.plot(ns, est(ns), "--")
+    pyplot.xlabel("n")
+    pyplot.ylabel("time")
 
     estimate_ = best, ts[best][1], ts[best][0]
     print("Estimated Time complexity: %s (c = %f) RSS: %f" % (estimate_))

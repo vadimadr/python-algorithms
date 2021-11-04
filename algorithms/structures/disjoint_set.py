@@ -14,7 +14,6 @@ offline.
 
 
 class DisjointSet:
-
     def __init__(self, data):
         sz = max(data)
         self.parent = [-1] * sz  # compressed parent array.
@@ -26,7 +25,7 @@ class DisjointSet:
     def add(self, item):
         """Adds a new set with the single element item"""
         if len(self.parent) <= item:
-            size_ = (item - len(self.parent) + 1)
+            size_ = item - len(self.parent) + 1
             self.rank.extend([0] * size_)
             self.parent.extend([-1] * size_)
 

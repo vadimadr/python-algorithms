@@ -115,7 +115,7 @@ class BaseGraph(ABC, metaclass=ABCMeta):
 
     def add_node(self, u):
         if u < self._n_nodes:
-            raise Exception('Node already exists')
+            raise Exception("Node already exists")
 
         self._n_nodes = u + 1
 
@@ -140,7 +140,7 @@ class BaseGraph(ABC, metaclass=ABCMeta):
 
     def add_edge(self, u, v, weight=None):
         if self._weighted and weight is None:
-            raise Exception('Graph is weighted but weight is None')
+            raise Exception("Graph is weighted but weight is None")
 
         if not self.has_edge(u, v):
             self._n_edges += 1
@@ -255,7 +255,7 @@ class AdjMxGraph(BaseGraph):
 
         if self._n_nodes > self._mx.shape[0]:
             # add 16 to each dimension, fill with 0
-            self._mx = np.pad(self._mx, ((0, 16), (0, 16)), mode='constant')
+            self._mx = np.pad(self._mx, ((0, 16), (0, 16)), mode="constant")
 
     def add_edge(self, u, v, weight=None):
         super().add_edge(u, v, weight)

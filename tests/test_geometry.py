@@ -3,15 +3,33 @@ from math import hypot, isclose, sqrt
 from hypothesis import given
 from hypothesis.strategies import floats, integers, tuples
 
-from algorithms.geometry import (Line2, Vec2, Vec3, circle_intersection,
-                                 circle_line_intersection, convex_polygon,
-                                 distance_to_line, l2, line, line_intersect,
-                                 line_parallel, line_projection, line_same,
-                                 orientation, orthogonal, points_inside,
-                                 polygon_area, segment_cover,
-                                 segment_intersection, segment_union_measure,
-                                 vec2_prod, vec3_prod, convex_hull, angle_cmp,
-                                 point_inside_convex_polygon)
+from algorithms.geometry import (
+    Line2,
+    Vec2,
+    Vec3,
+    angle_cmp,
+    circle_intersection,
+    circle_line_intersection,
+    convex_hull,
+    convex_polygon,
+    distance_to_line,
+    l2,
+    line,
+    line_intersect,
+    line_parallel,
+    line_projection,
+    line_same,
+    orientation,
+    orthogonal,
+    point_inside_convex_polygon,
+    points_inside,
+    polygon_area,
+    segment_cover,
+    segment_intersection,
+    segment_union_measure,
+    vec2_prod,
+    vec3_prod,
+)
 from tests.utils import float_eq
 
 
@@ -38,7 +56,7 @@ def test_dot3():
 
     x1 = Vec3(1.3, 2.7, 0.1)
     y2 = Vec3(1.5, -5 / 6, 3)
-    y3 = Vec3(1.5, 0.6, .3)
+    y3 = Vec3(1.5, 0.6, 0.3)
     assert orthogonal(x1, y2)
     assert not orthogonal(x1, y3)
 
@@ -75,7 +93,7 @@ def test_vec2_prod():
 
 def test_vec3_prod():
     a = Vec3(1, 2.5, 3)
-    b = Vec3(.7, 1.4, 0)
+    b = Vec3(0.7, 1.4, 0)
     c = vec3_prod(a, b)
     assert orthogonal(a, c)
     assert orthogonal(b, c)
@@ -100,7 +118,7 @@ def test_line_int(t):
     px, py, qx, qy = t
     p = Vec2(px, py)
     q = Vec2(qx, qy)
-    a, b, c = line(p, q, 'gcd')
+    a, b, c = line(p, q, "gcd")
     assert isinstance(a, int)
     assert isinstance(b, int)
     assert isinstance(c, int)
@@ -198,8 +216,7 @@ def test_points_inside():
 def test_convex_polygon():
     xs = [Vec2(1, 1), Vec2(2, 2), Vec2(3, 1), Vec2(3, 3), Vec2(1, 3)]
     assert not convex_polygon(xs)
-    xs = [Vec2(2, 1), Vec2(3, 1), Vec2(4, 2), Vec2(3, 3), Vec2(2, 3),
-          Vec2(1, 2)]
+    xs = [Vec2(2, 1), Vec2(3, 1), Vec2(4, 2), Vec2(3, 3), Vec2(2, 3), Vec2(1, 2)]
     assert convex_polygon(xs)
 
 
@@ -264,8 +281,16 @@ def test_convex_hull():
 
 def test_angle_cmp():
     # points sorted in counter-clockwise order
-    pts = [Vec2(-2, 0), Vec2(-1, -2), Vec2(0, -3), Vec2(1, -2), Vec2(1, 1),
-           Vec2(1, 2), Vec2(0, 3), Vec2(-1, 2)]
+    pts = [
+        Vec2(-2, 0),
+        Vec2(-1, -2),
+        Vec2(0, -3),
+        Vec2(1, -2),
+        Vec2(1, 1),
+        Vec2(1, 2),
+        Vec2(0, 3),
+        Vec2(-1, 2),
+    ]
 
     for i in range(len(pts)):
         for j in range(i + 1, len(pts)):

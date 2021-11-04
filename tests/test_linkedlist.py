@@ -1,6 +1,6 @@
 import pytest
-from hypothesis import given, assume
-from hypothesis.strategies import lists, integers
+from hypothesis import assume, given
+from hypothesis.strategies import integers, lists
 
 from algorithms.structures.linkedlist import LinkedList
 
@@ -90,17 +90,20 @@ def forward_list(head, limit=100):
     return lst
 
 
-@pytest.mark.parametrize('lst,a,b', [
-    ([1, 2, 3, 4, 5, 6, 7], 2, 6),
-    ([1, 2, 3], 1, 2),
-    ([1, 2, 3], 2, 3),
-    ([1, 2, 3, 4], 2, 3),
-    ([1, 2, 3, 4], 3, 2),
-    ([1, 2, 3], 2, 2),
-    ([1, 2, 3], 1, 1),
-    ([1, 2, 3], 3, 3),
-    ([1], 1, 1)
-])
+@pytest.mark.parametrize(
+    "lst,a,b",
+    [
+        ([1, 2, 3, 4, 5, 6, 7], 2, 6),
+        ([1, 2, 3], 1, 2),
+        ([1, 2, 3], 2, 3),
+        ([1, 2, 3, 4], 2, 3),
+        ([1, 2, 3, 4], 3, 2),
+        ([1, 2, 3], 2, 2),
+        ([1, 2, 3], 1, 1),
+        ([1, 2, 3], 3, 3),
+        ([1], 1, 1),
+    ],
+)
 def test_swap(lst, a, b):
     head = LinkedList.from_pylist(lst)
     item1 = head.search(a)
@@ -114,12 +117,7 @@ def test_swap(lst, a, b):
     assert reverse_list(head) == list(reversed(lst))
 
 
-@pytest.mark.parametrize('lst', [
-    [1, 2, 3, 4],
-    [1, 2, 3],
-    [1, 2],
-    [1]
-])
+@pytest.mark.parametrize("lst", [[1, 2, 3, 4], [1, 2, 3], [1, 2], [1]])
 def test_reverse(lst):
     head = LinkedList.from_pylist(lst)
     head = head.reverse()

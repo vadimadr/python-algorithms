@@ -209,8 +209,9 @@ def graph_intersect(g1: BaseGraph, g2: BaseGraph):
     g2_edges = set(to_edge_list(g2))
 
     intersection = g1_edges.intersection(g2_edges)
-    return g1.__class__.from_edge_list(intersection, directed=g1.directed,
-                                       weighted=g1.weighted)
+    return g1.__class__.from_edge_list(
+        intersection, directed=g1.directed, weighted=g1.weighted
+    )
 
 
 def to_undirected(g: BaseGraph, min_weight=True):

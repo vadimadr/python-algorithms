@@ -23,7 +23,6 @@ priority queues or to sort without additional memory.
 
 
 class BinaryHeap:
-
     def __init__(self, data=None, maxheap=False):
         self.maxheap = maxheap
         if data:
@@ -55,8 +54,12 @@ class BinaryHeap:
         while child < n:
             # select smallest child
             maxheap = self.maxheap
-            if child + 1 < n and (not maxheap and a[child + 1] < a[child] or
-                                  maxheap and a[child] < a[child + 1]):
+            if child + 1 < n and (
+                not maxheap
+                and a[child + 1] < a[child]
+                or maxheap
+                and a[child] < a[child + 1]
+            ):
                 child += 1
             a[i] = a[child]
             i = child
@@ -75,8 +78,12 @@ class BinaryHeap:
         item = a[i]
         while i > root:
             parent = (i - 1) // 2
-            if not self.maxheap and item < a[parent] \
-                    or self.maxheap and a[parent] < item:
+            if (
+                not self.maxheap
+                and item < a[parent]
+                or self.maxheap
+                and a[parent] < item
+            ):
                 a[i] = a[parent]
                 i = parent
             else:
@@ -112,8 +119,7 @@ class BinaryHeap:
         """Replaces element with index i and restores heap property"""
         oldval = self.data[i]
         self.data[i] = newval
-        if not self.maxheap and newval < oldval \
-                or self.maxheap and oldval < newval:
+        if not self.maxheap and newval < oldval or self.maxheap and oldval < newval:
             self.siftup(i)
         else:
             self.siftdown(i)

@@ -2,7 +2,7 @@ from collections import deque
 
 import numpy as np
 
-from . import BaseGraph, to_unweighted, to_undirected, to_adjacency_matrix
+from . import BaseGraph, to_adjacency_matrix, to_undirected, to_unweighted
 
 
 def build_residual_graph(graph):
