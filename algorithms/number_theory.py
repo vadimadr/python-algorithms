@@ -339,7 +339,7 @@ def linear_sieve(max_n):
     smallest_factors = [0] * max_n
     primes = []
 
-    for i in range(1, max_n):
+    for i in range(2, max_n):
         if smallest_factors[i] == 0:
             smallest_factors[i] = i
             primes.append(i)
@@ -361,8 +361,10 @@ def powmod(x, k, m):
     while k > 0:
         if odd(k):
             ans = ans * x % m
-        x = x * x % m
-        k /= 2
+            k -= 1
+        else:
+            x = x * x % m
+            k /= 2
     return ans
 
 
@@ -375,6 +377,12 @@ def factor_twos(x):
     return d, s
 
 
+def fermat_test(n, a):
+    if n == 2:
+        return True
+    return powmod(a, n - 1, n) == 1
+
+
 def fermat_strong_test(n, a):
     """Performs Fermat Strong Test with base ans
     Returns True if n is probable prime
@@ -382,60 +390,61 @@ def fermat_strong_test(n, a):
     For a composite integer n it returns True with probability ~ 1/4
     For a prime integer n it always returns True
     """
+    if n == 2:
+        return True
     # n - 1 = d * 2 ^ s
     d, s = factor_twos(n - 1)
 
     # by Fermat theorem, if n is prime then
     # (a^d - 1)(a^d + 1)(a^2d + 1)(a^4d + 1)...(a^2^(s-1)d + 1) = 0 (mod n)
     a = powmod(a, d, n)
-    if a != 1 and a != n - 1:
-        return False
+    if a == 1 or a == n - 1:
+        return True
     for _ in range(s):
         a = a * a % n
-        if a != n - 1:
-            return False
-    return True
+        if a == n - 1:
+            return True
+    return False
 
 
 def jacobi(a, n):
     """Returns:
-    0 if a = 0 (mod n)
-    1 if a is perfect square modulo n
+    0 if a is not coprime to n (gcd(a,n) != 1)
     -1 if a is NOT perfect square modulo n
+    1 if a maybe perfect square
     """
+    if n == 1:
+        return 1
     if a % n == 0:
         return 0
-    if a < 0 and n & 2 == 0:
-        return jacobi(-a, n)
-    elif a < 0:
-        return -jacobi(-a, n)
+    if a < 0:
+        return jacobi(a + n * (1 + (-a - 1) // n), n)
 
-    a1, k = factor_twos(a, n)
+    # jacobi of (2^k/n)
+    a1, k = factor_twos(a)
+    j_even = 1 if n % 8 == 1 or n % 8 == 7 else -1
+    if even(k):
+        j_even = 1
 
-    if even(k) or n & 7 == 1 or n & 7 == 7:
-        s = 1
-    else:
-        s = -1
-    if n & 3 == 3 and a1 & 3 == 3:
-        s = -s
-
-    if a1 == 1:
-        return s
-    return s * jacobi(n % a1, a1)
+    # law of quadratic reciprocity
+    if n % 4 == 3 and a1 % 4 == 3:
+        return -j_even * jacobi(n % a1, a1)
+    return j_even * jacobi(n % a1, a1)
 
 
 def lucas_strong_test(n, p, q):
     if even(n):
-        return True
+        return n == 2
 
-    D = p ** 2 + 4 * q
+    D = p ** 2 - 4 * q
     inv2 = powmod(2, n - 2, n)
 
     def lucas_double(u_k, v_k, k):
         # computes U_k, V_k -> U_2k, V_2k
-        return u_k * v_k % n, (v_k * v_k + -2 * powmod(q, k)) % n
+        return u_k * v_k % n, (v_k * v_k + -2 * powmod(q, k, n)) % n
 
     def lucas_sum(u_k, v_k, u_m, v_m):
+        # computes U_{k+m}, V_{k+m}
         u_km = (u_k * v_m + u_m * v_k) * inv2 % n
         v_km = (v_k * v_m + D * u_k * u_m) * inv2 % n
         return u_km, v_km
@@ -445,32 +454,33 @@ def lucas_strong_test(n, p, q):
 
     # compute U_d, V_d
     # representing d as binary number
-    u, v = 1, 2
-    u_p, v_p, k = 1, 2, 0
-    while d:
-        u_p, v_p = lucas_double(u_p, v_p, k)
-        if d & 1:
-            u, v = lucas_sum(u, v, u_p, v_p)
-        k += 1
-        d >>= 1
+    u, v = 0, 2  # u0, v0
+    u_k, v_k, k, d_rem = 1, p, 1, d  # u1, v1
+    while d_rem:
+        if d_rem & 1:
+            u, v = lucas_sum(u, v, u_k, v_k)
+        u_k, v_k = lucas_double(u_k, v_k, k)
+        k *= 2
+        d_rem >>= 1
 
     for _ in range(s + 1):
-        if u != 0:
-            return False
-        u, v = lucas_double(u, v)
-    return True
+        if u == 0:
+            return True
+        u, v = lucas_double(u, v, d)
+        d *= 2
+    return False
 
 
 def lucas_selfridge_test(n):
     if isqrt(n) ** 2 == n:
         return False
     D = 5
-    while jacobi(D, n) == 1 or gcd(D, n) != 1:
+    while jacobi(D, n) != -1:
         if D > 0:
             D = -(D + 2)
         else:
             D = -(D - 2)
-    return lucas_strong_test(n, 1, (1 - D) / 4)
+    return lucas_strong_test(n, 1, (1 - D) // 4)
 
 
 # correctly checks all primes < 3 * 10^9
@@ -479,10 +489,20 @@ BASES_1 = [2, 3, 5, 7]
 BASES_2 = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37]
 
 
-def Miller_Rabin_test(n, num_trials=5, bases=None):
+def Miller_Rabin_test(n, bases=None, num_trials=5):
     if bases is None:
-        bases = [randint(2, n - 1) for _ in range(num_trials)]
+        # with random base probability of false positive is 1/4!
+        # bases = [randint(2, n - 1) for _ in range(num_trials)]
+        if n <= 1e9:
+            bases = BASES_1
+        else:
+            bases = BASES_2
+
     for a in bases:
+        if n == a:
+            continue
+        if n % a == 0:
+            return False
         if not fermat_strong_test(n, a):
             return False
     return True
@@ -492,8 +512,10 @@ def Ballie_PSW_test(n, max_trivial_trials=100):
     for i in range(max_trivial_trials):
         if primes[i] == n:
             return True
-        if n % primes[i] == 0 or primes[i] ** 2 >= n:
+        if n % primes[i] == 0:
             return False
+        if primes[i] ** 2 >= n:
+            return True
     if not fermat_strong_test(n, 2):
         return False
     if not lucas_selfridge_test(n):
