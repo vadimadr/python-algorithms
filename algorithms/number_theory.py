@@ -437,7 +437,12 @@ def lucas_strong_test(n, p, q):
         return n == 2
 
     D = p ** 2 - 4 * q
-    inv2 = powmod(2, n - 2, n)
+
+    def div2(x):
+        """Performs division by 2 modulo n"""
+        if odd(x):
+            x += n
+        return x // 2 % n
 
     def lucas_double(u_k, v_k, k):
         # computes U_k, V_k -> U_2k, V_2k
@@ -445,8 +450,8 @@ def lucas_strong_test(n, p, q):
 
     def lucas_sum(u_k, v_k, u_m, v_m):
         # computes U_{k+m}, V_{k+m}
-        u_km = (u_k * v_m + u_m * v_k) * inv2 % n
-        v_km = (v_k * v_m + D * u_k * u_m) * inv2 % n
+        u_km = div2(u_k * v_m + u_m * v_k)
+        v_km = div2(v_k * v_m + D * u_k * u_m)
         return u_km, v_km
 
     # n - J(D/n) = 2^s*d
@@ -463,11 +468,18 @@ def lucas_strong_test(n, p, q):
         k *= 2
         d_rem >>= 1
 
+    if u == 0:
+        return True
+
     for _ in range(s + 1):
-        if u == 0:
+        if v == 0:
             return True
         u, v = lucas_double(u, v, d)
         d *= 2
+
+    # If Q != +-1 we may additionally check congruences
+    # V_{n+1} = 2Q (mod n) and Q^(n+1)/2 = Q*J(Q, n) (mod n)
+    # (Frobenius probable prime)
     return False
 
 
