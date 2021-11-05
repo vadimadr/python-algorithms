@@ -472,6 +472,7 @@ def lucas_strong_test(n, p, q):
 
 
 def lucas_selfridge_test(n):
+    """Lucas strong test with Selfridge parameters"""
     if isqrt(n) ** 2 == n:
         return False
     D = 5
@@ -509,6 +510,11 @@ def Miller_Rabin_test(n, bases=None, num_trials=5):
 
 
 def Ballie_PSW_test(n, max_trivial_trials=100):
+    """BPSW probable primality test.
+
+    There is no known pseudo-primes that pass this test.
+    Lower bound for potential pseudoprime is 10^10000.
+    """
     for i in range(max_trivial_trials):
         if primes[i] == n:
             return True
@@ -542,6 +548,24 @@ def Pollard_rho_Floyd(n, x0=2, c=1):
         y = f(f(y))
         g = gcd(abs(x - y), n)
     return g
+
+
+def Pollard_rho_factor(n, check_prime=False):
+    """Runs Pollard Rho method with different
+    initial values and intercepts (x0, c) until
+    some factor is found"""
+    if check_prime and Miller_Rabin_test(n):
+        return n
+
+    if even(n):
+        return 2
+
+    while True:
+        x0 = randint(2, n - 1)
+        c = randint(1, n - 1)
+        g = Pollard_rho_Floyd(n, x0, c)
+        if g != n:
+            return g
 
 
 def Pollard_pm1(n, primes, max_B=1000000):

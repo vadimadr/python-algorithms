@@ -7,6 +7,8 @@ from hypothesis.strategies import integers
 
 from algorithms.number_theory import (
     Ballie_PSW_test,
+    Pollard_rho_factor,
+    Pollard_pm1,
     binomial,
     binpow,
     euler_phi,
@@ -75,6 +77,17 @@ class TestFactor:
         n = reduce(lambda a, b: a * b[0], factors, 1)
 
         assert factorize(n) == factors
+
+    def test_pollard_rho(self, nonprimes):
+        for np in nonprimes:
+            d = Pollard_rho_factor(np)
+            assert d != np and np % d == 0
+
+    def test_pollard_pm1(self, nonprimes):
+        primes, _ = linear_sieve(500)
+        for np in nonprimes:
+            d = Pollard_pm1(np, primes)
+            assert d != np and np % d == 0
 
 
 class TestSieve:
