@@ -615,3 +615,67 @@ def Pollard_pm1(n, primes, max_B=1000000):
                 return g
         B *= 2
     return 1
+
+
+def log_modulo(a, b, m):
+    """Computes discrete logarithm i.e.
+    finds x such that a^x = b (mod m)
+
+    Uses Shanks algorithms which takes O(sqrt(m)) time
+    """
+    # find x in form x = np - q for some (n, p)
+    # => a^x = b ~ a^np = a^q * b
+    a, b = a % m, b % m
+    n = isqrt(m) + 1
+    # compute all a^q * b
+    rhs = {}
+    for q in range(n + 1):
+        rhs[b] = q
+        b = b * a % m
+
+    an = powmod(a, n, m)
+    lhs = 1
+    for p in range(1, n + 1):
+        lhs = lhs * an % m
+        if lhs in rhs:
+            return n * p - rhs[lhs]
+    # some numbers do not have discrete log (example: log_2 3 (mod 7))
+    return None
+
+
+def primitive_root(n):
+    """Finds generator of group of integers modulo p.
+    i.e. finds integer `g` such that for each `a` exists some `k`:
+    a = g^k (mod n)
+
+    g exists if and only if:
+    1) n is p^d  2) n is 2*p^d for 3) n <= 4 (Gauss theorem)
+    """
+    if n == 2:
+        return 1
+    phi = euler_phi(n)
+    phi_divisors = factorize(phi)
+    for g in range(2, n + 1):
+        if gcd(g, n) != 1:
+            continue
+        for d, _ in phi_divisors:
+            if powmod(g, phi // d, n) == 1:
+                # g can not be a generator
+                break
+        else:
+            return g
+
+    # generator not found
+    # Gauss theorem conditions did not met
+    return None
+
+
+def kth_root_modulo(a, k, n):
+    """Computes discrete kth root
+    i.e. find x such that x^k = a (mod n)"""
+    # x = g^y => x^k = (g^k)^y = a
+    # => y = log_{g^k} a (mod n)
+    g = primitive_root(n)
+    gk = powmod(g, k, n)
+    y = log_modulo(gk, a, n)
+    return powmod(g, y, n)
