@@ -1,14 +1,13 @@
+from bisect import bisect_left
 import os
 from functools import reduce
 
 import pytest
 from hypothesis import assume, given
-from hypothesis.strategies import integers
+from hypothesis.strategies import integers, composite
 
 from algorithms.number_theory import (
     Ballie_PSW_test,
-    Pollard_rho_factor,
-    Pollard_pm1,
     binomial,
     binpow,
     euler_phi,
@@ -19,29 +18,38 @@ from algorithms.number_theory import (
     fibonacci,
     gcd,
     is_prime,
+    jacobi,
+    kth_root_modulo,
     linear_diophantine,
     linear_sieve,
-    odd,
-    sieve,
-    powmod,
-    Miller_Rabin_test,
-    jacobi,
+    log_modulo,
     lucas_selfridge_test,
+    Miller_Rabin_test,
+    odd,
+    Pollard_pm1,
+    Pollard_rho_factor,
+    powmod,
+    primitive_root,
+    sieve,
 )
 
 _dir = os.path.dirname(__file__)
 
+with open(os.path.join(_dir, "data/primes.dat")) as src:
+    PRIME_LIST = list(map(int, src))
 
-@pytest.fixture
+with open(os.path.join(_dir, "data/notprimes.dat")) as src:
+    NON_PRIMES = list(map(int, src))
+
+
+@pytest.fixture(scope="module")
 def primes():
-    with open(os.path.join(_dir, "data/primes.dat")) as src:
-        return list(map(int, src))
+    return PRIME_LIST
 
 
 @pytest.fixture
 def nonprimes():
-    with open(os.path.join(_dir, "data/notprimes.dat")) as src:
-        return list(map(int, src))
+    return NON_PRIMES
 
 
 class TestIs_prime:
@@ -269,3 +277,82 @@ def test_linear_diophantine(a, b, c):
 def test_lind():
     ans = linear_diophantine(1, 1, 0)
     assert ans is not None
+
+
+@pytest.mark.parametrize("mod", [7, 11, 13])
+def test_discrete_log(mod):
+    for a in range(2, mod):
+        for x in range(mod - 1):
+            b = a ** x % mod
+            x_comp = log_modulo(a, b, mod)
+            assert a ** x_comp % mod == b
+
+
+@composite
+def st_primes(draw, max_prime=100):
+    max_ind = bisect_left(PRIME_LIST, max_prime)
+    i = draw(integers(0, max_ind))
+    return PRIME_LIST[i]
+
+
+@composite
+def st_discrete_log(draw):
+    mod = draw(st_primes(100))
+    a = draw(integers(1, mod - 1))
+    x = draw(integers(0, mod - 1))
+    return a, x, mod
+
+
+@given(st_discrete_log())
+def test_discrete_log_hyp(data):
+    a, x, mod = data
+    a %= mod
+    x %= mod
+    b = powmod(a, x, mod)
+    x = log_modulo(a, b, mod)
+    assert powmod(a, x, mod) == b
+
+
+@pytest.mark.parametrize(
+    "n,g",
+    [
+        (2, 1),
+        (3, 2),
+        (4, 3),
+        (5, 2),
+        (6, 5),
+        (7, 3),
+        (9, 2),
+        (10, 3),
+        (11, 2),
+        (29, 2),
+        (137, 3),
+        (5233, 10),
+    ],
+)
+def test_primitive_root(n, g):
+    assert primitive_root(n) == g
+
+
+@composite
+def st_kth_root(draw):
+    m = draw(st_primes())
+    assume(m > 2)
+    k = draw(integers(2, m - 1))
+    a = draw(integers(2, m - 1))
+    x = powmod(a, k, m)
+    assume(x != 1)
+    return x, k, m, a
+
+
+@pytest.mark.parametrize("x,k,m", [(4, 2, 17), (4, 2, 5), (2, 2, 7)])
+def test_kth_root(x, k, m):
+    sqx = kth_root_modulo(x, k, m)
+    assert powmod(sqx, k, m) == x
+
+
+@given(st_kth_root())
+def test_kth_root_hyp(data):
+    x, k, m, a = data
+    a_comp = kth_root_modulo(x, k, m)
+    assert powmod(a_comp, k, m) == x
