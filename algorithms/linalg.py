@@ -13,7 +13,7 @@ def matrix_product(lhs, rhs):
     return res
 
 
-def LUP_decomposition(A, tol=1e-6):
+def LUP_decomposition(A, tol=1e-6, count_perm=False):
     """Factorize matrix A = PLU
     using Gaussian Elimination in O(n^3)
     L - is lower triangular, U - upper triangular, and P - is permutation matrix.
@@ -21,6 +21,7 @@ def LUP_decomposition(A, tol=1e-6):
     A = A.copy()
     n, m = A.shape
     p = np.arange(n)
+    n_perm = 0
     for jc in range(min(n, m)):
         # select pivot: maximize |U_{j,j}|
         max_j = jc
@@ -29,7 +30,9 @@ def LUP_decomposition(A, tol=1e-6):
                 max_j = ir
 
         # swap jc and max_j rows
-        p[max_j], p[jc] = p[jc], p[max_j]
+        if p[max_j] != p[jc]:
+            p[max_j], p[jc] = p[jc], p[max_j]
+            n_perm += 1
 
         if abs(A[p[jc], jc]) < tol:
             # skip current row
@@ -49,4 +52,63 @@ def LUP_decomposition(A, tol=1e-6):
         for j in range(i, m):
             U[i, j] = A[p[i], j]
 
+    if count_perm:
+        return L, U, p, n_perm
     return L, U, p
+
+
+def det(X):
+    _, u, _, np = LUP_decomposition(X, count_perm=True)
+    res = 1
+    for i in range(X.shape[0]):
+        res *= u[i, i]
+    return res * (-1) ** np
+
+
+def linsolve(A, B, tol=1e-6):
+    """Solve AX = B
+
+    If system is underparametrized, then find some root
+    """
+    assert A.shape[0] == B.shape[0], "Incorrect dimensions of equation"
+    assert A.shape[0] <= A.shape[1], "equation is over-parametrized"
+    B = B.reshape((B.shape[0], -1))  # make B always 2 dim
+    _, d = A.shape
+    n, m = B.shape
+
+    l, u, p = LUP_decomposition(A)
+    x = np.zeros((d, m))
+    for k in range(m):
+
+        # forward substitution (solve Ly = b)
+        for i in range(min(d, n)):
+            x[i, k] = B[p[i], k]
+            for j in range(min(d, i)):
+                x[i, k] -= l[i, j] * x[j, k]
+
+        # backward substitution (solve Ux = y)
+        for i in reversed(range(min(d, n))):
+            if abs(u[i, i]) < tol:
+                # system is degenerate
+                return False
+            for j in range(i + 1, d):
+                x[i, k] -= u[i, j] * x[j, k]
+            x[i, k] /= u[i, i]
+
+    return x
+
+
+def matrix_invert(X):
+    assert X.shape[0] == X.shape[1]
+    n = X.shape[0]
+    P = np.eye(n)
+    return linsolve(X, P)
+
+
+def matrix_rank(X):
+    _, U, _ = LUP_decomposition(X)
+    r = 0
+    for i in range(min(X.shape[0], X.shape[1])):
+        if abs(U[i, i]) >= 1e-6:
+            r += 1
+    return r
