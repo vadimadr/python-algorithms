@@ -112,3 +112,43 @@ def matrix_rank(X):
         if abs(U[i, i]) >= 1e-6:
             r += 1
     return r
+
+
+def QR_decomposition(A):
+    """Perform orthogonalization of A using
+    (stable modification of) Gram–Schmidt process (MGS)
+
+    Decomposes A = Q * R into product of orthonormal matrix Q
+    and upper-triangular matrix R
+    """
+    _, m = A.shape
+    Q, R = A.copy(), np.eye(m)
+    for j in range(m):
+        for i in range(j):
+            R[i, j] = np.dot(Q[:, i], Q[:, j])
+            Q[:, j] -= R[i, j] * Q[:, i]
+        R[j, j] = np.sqrt(np.dot(Q[:, j], Q[:, j]))
+        if np.abs(R[j, j]) < 1e-6:
+            continue
+        Q[:, j] /= R[j, j]
+    return Q, R
+
+
+def QR_algorithm_eig(A, max_iters=1000, max_rel_err=1e-6):
+    """Finds eigenvectors and corresponding eigenvalues
+    using QR algorithm.
+    """
+    eig_w = np.zeros(A.shape[0])
+    eig_v = np.eye(A.shape[0])
+    for _ in range(max_iters):
+        Q, R = QR_decomposition(A)
+        A = R @ Q
+
+        delta = np.abs((np.diag(A) / eig_w - 1))
+        print(delta)
+
+        eig_v = eig_v @ Q
+        eig_w = np.diag(A)
+        if np.min(delta) < max_rel_err:
+            break
+    return eig_w, eig_v

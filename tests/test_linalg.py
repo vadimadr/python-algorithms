@@ -11,6 +11,8 @@ from algorithms.linalg import (
     matrix_invert,
     matrix_product,
     matrix_rank,
+    QR_decomposition,
+    QR_algorithm_eig,
 )
 
 
@@ -122,3 +124,25 @@ def test_matrix_invert(X):
 @given(st_matrix())
 def test_matrix_rank(X):
     assert matrix_rank(X) == np.linalg.matrix_rank(X)
+
+
+@given(st_invertible_matrix())
+def test_QR_decomposition(x):
+    q, r = QR_decomposition(x)
+
+    np.testing.assert_allclose(q.T @ q, np.eye(q.shape[0]), atol=1e-7)
+    np.testing.assert_allclose(q @ r, x, atol=1e-7)
+
+
+@pytest.mark.parametrize(
+    "x",
+    [
+        np.array([[1.0, 0.0], [1.0, 1.0]]),
+        np.array([[1, 0.5], [0.5, 1]]),
+    ],
+)
+def test_eigenvals(x):
+    w, v = QR_algorithm_eig(x)
+
+    for i in range(x.shape[0]):
+        np.testing.assert_allclose(w[i] * v[:, i], x @ v[:, i], atol=1e-4)
